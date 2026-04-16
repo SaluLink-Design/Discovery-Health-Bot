@@ -1,0 +1,51 @@
+{
+  "name": "discovery-health-bot",
+  "version": "1.0.0",
+  "description": "React app inspired by the Authi Bot notebook for Discovery Health benefit guidance.",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api:py\" \"npm run dev:web\"",
+    "dev:web": "vite",
+    "dev:api": "node server/index.js",
+    "dev:api:py": "python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "start": "python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SaluLink-Design/Discovery-Health-Bot.git"
+  },
+  "keywords": [
+    "react",
+    "vite",
+    "tailwind",
+    "health-bot"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SaluLink-Design/Discovery-Health-Bot/issues"
+  },
+  "homepage": "https://github.com/SaluLink-Design/Discovery-Health-Bot#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "pdf-parse": "^2.4.5",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@tailwindcss/vite": "^4.2.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "tailwindcss": "^4.2.2",
+    "vite": "^8.0.8"
+  }
+}
