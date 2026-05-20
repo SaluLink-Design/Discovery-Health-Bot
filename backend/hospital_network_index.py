@@ -341,6 +341,41 @@ def parse_network_filter(value: str | None) -> frozenset[str] | None:
     return resolve_network_codes_from_query(token)
 
 
+def parse_networks_filter(value: str | None) -> frozenset[str] | None:
+    """Parse comma-separated network codes (e.g. S,D or KH,KC)."""
+    if not value:
+        return None
+    tokens = [t.strip() for t in value.split(",") if t.strip()]
+    if not tokens:
+        return None
+    matched: set[str] = set()
+    for token in tokens:
+        upper = token.upper()
+        if upper in NETWORK_LABELS:
+            matched.add(upper)
+            continue
+        resolved = resolve_network_codes_from_query(token)
+        if resolved:
+            matched.update(resolved)
+    return frozenset(matched) if matched else None
+
+
+def merge_network_filters(
+    networks_param: str | None,
+    network_param: str | None,
+) -> frozenset[str] | None:
+    """Combine `networks` (comma-separated) and legacy single `network` query params."""
+    from_networks = parse_networks_filter(networks_param)
+    from_network = parse_network_filter(network_param)
+    if from_networks is None and from_network is None:
+        return None
+    if from_networks is None:
+        return from_network
+    if from_network is None:
+        return from_networks
+    return from_networks | from_network
+
+
 def filter_hospital_records(
     records: list[dict[str, Any]],
     *,

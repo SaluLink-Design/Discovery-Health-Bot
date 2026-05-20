@@ -25,7 +25,7 @@ from backend.hospital_network_index import (
     keycare_broad_hint_strings,
     parse_hospital_network_pdf,
     parse_hospital_search_params,
-    parse_network_filter,
+    merge_network_filters,
     wants_hospital_directory,
 )
 
@@ -640,6 +640,10 @@ def ask(request: AskRequest) -> dict[str, Any]:
 def search_hospitals(
     province: str,
     network: str | None = None,
+    networks: str | None = Query(
+        None,
+        description="Comma-separated network codes, e.g. S,D for Smart and Delta.",
+    ),
     town: str | None = None,
     q: str | None = None,
     flat: bool = Query(False, description="If true, return one flat list instead of per-town sections."),
@@ -652,7 +656,7 @@ def search_hospitals(
             "knownProvinces": sorted({row["province"] for row in HOSPITAL_RECORDS}),
         }
 
-    nets = parse_network_filter(network)
+    nets = merge_network_filters(networks, network)
     filtered = filter_hospital_records(
         HOSPITAL_RECORDS,
         province=prov,
