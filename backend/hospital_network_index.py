@@ -64,6 +64,23 @@ def _clean_line(line: str) -> str:
     return line.replace("\u0007", "").replace("\x07", "").strip()
 
 
+def _split_hospital_name(name: str) -> tuple[str, str]:
+    """Separate a hospital name from its trailing parenthetical qualifier.
+
+    "Netcare Milpark (cardiac electrophysiology centre – arrhythmia conditions only)"
+    → ("Netcare Milpark", "cardiac electrophysiology centre – arrhythmia conditions only")
+
+    Names with no qualifying parenthetical are returned unchanged with an empty qualifier.
+    """
+    m = re.match(r"^(.*?)\s*\(([^(]+)\)\s*$", name.strip())
+    if m:
+        base = m.group(1).strip()
+        qualifier = m.group(2).strip()
+        if base:
+            return base, qualifier
+    return name.strip(), ""
+
+
 def _looks_like_hospital_name(line: str) -> bool:
     if len(line) >= 42:
         return True
@@ -162,6 +179,18 @@ def parse_hospital_network_pdf(pdf_path: Path) -> list[dict[str, Any]]:
         if _looks_like_hospital_name(line):
             hospital = line
             i += 1
+            # Join continuation lines when the PDF wraps a long name with an
+            # unclosed parenthesis across two lines, e.g.:
+            #   "Netcare Milpark (cardiac electrophysiology"
+            #   "centre – arrhythmia conditions only)"
+            while (
+                i < len(lines)
+                and not is_code(lines[i])
+                and lines[i] not in PROVINCES
+                and hospital.count("(") > hospital.count(")")
+            ):
+                hospital = hospital + " " + lines[i]
+                i += 1
             codes: list[str] = []
             while i < len(lines) and is_code(lines[i]):
                 codes.append(lines[i].replace("*", ""))
@@ -426,16 +455,24 @@ def build_hospital_sections(
             }
         ]
 
+    def _make_item(r: dict[str, Any], label_prefix: str = "") -> dict[str, Any]:
+        clean_name, qualifier = _split_hospital_name(r["hospital"])
+        network_detail = format_network_detail(r["networks"])
+        detail = f"{network_detail} · {qualifier}" if qualifier else network_detail
+        label = f"{label_prefix}{clean_name}" if label_prefix else clean_name
+        return {
+            "label": label,
+            "detail": detail,
+            "address": f"{clean_name}, {r['town']}, South Africa",
+        }
+
     trimmed = records[:max_items]
     if flat:
         return [
             {
                 "title": title,
                 "items": [
-                    {
-                        "label": f"{r['town']} – {r['hospital']}",
-                        "detail": format_network_detail(r["networks"]),
-                    }
+                    _make_item(r, label_prefix=f"{r['town']} – ")
                     for r in sorted(trimmed, key=lambda r: (r["town"].lower(), r["hospital"].lower()))
                 ],
             }
@@ -448,10 +485,7 @@ def build_hospital_sections(
     sections: list[dict[str, Any]] = []
     for town in sorted(towns.keys(), key=lambda s: s.lower()):
         items = [
-            {
-                "label": r["hospital"],
-                "detail": format_network_detail(r["networks"]),
-            }
+            _make_item(r)
             for r in sorted(towns[town], key=lambda x: x["hospital"].lower())
         ]
         sections.append({"title": f"{title} – {town}", "items": items})

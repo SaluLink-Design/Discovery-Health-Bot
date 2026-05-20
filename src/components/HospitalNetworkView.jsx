@@ -65,6 +65,28 @@ export default function HospitalNetworkView({ profile, onNavigate }) {
     if (e.key === 'Enter') handleSearch();
   };
 
+  const handleGetDirections = (address) => {
+    const encoded = encodeURIComponent(address);
+    if (!navigator.geolocation) {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encoded}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const origin = `${coords.latitude},${coords.longitude}`;
+        window.open(
+          `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encoded}`,
+          '_blank',
+          'noopener,noreferrer',
+        );
+      },
+      () => {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${encoded}`, '_blank', 'noopener,noreferrer');
+      },
+      { timeout: 6000 },
+    );
+  };
+
   const planLabel = plan?.label ?? 'your plan';
   const description = unrestricted
     ? `Select a province (and optional town). As an ${planLabel} member you can use hospitals across all networks in that province.`
@@ -193,7 +215,7 @@ export default function HospitalNetworkView({ profile, onNavigate }) {
 
           <div className="grid gap-5">
             {results.sections.map((section, i) => (
-              <ResultCard key={`${section.title}-${i}`} title={section.title} items={section.items} />
+              <ResultCard key={`${section.title}-${i}`} title={section.title} items={section.items} onGetDirections={handleGetDirections} />
             ))}
           </div>
         </div>
