@@ -5,7 +5,7 @@ from typing import Any
 import re
 
 import fitz
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -13,6 +13,20 @@ from backend.cdl_indexes import (
     build_medicine_index,
     build_treatment_index,
     discover_cdl_conditions_from_medicine_pdf,
+)
+from backend.hospital_network_index import (
+    NETWORK_LABELS,
+    HospitalSearchParams,
+    build_hospital_sections,
+    canonical_province,
+    filter_hospital_records,
+    is_broad_keycare_network_filter,
+    keycare_broad_hint_section,
+    keycare_broad_hint_strings,
+    parse_hospital_network_pdf,
+    parse_hospital_search_params,
+    parse_network_filter,
+    wants_hospital_directory,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -109,9 +123,29 @@ KNOWLEDGE_BASE = {
 }
 
 INTENT_MATCHERS = {
+    "hospital": [
+        "hospital",
+        "hospitals",
+        "network",
+        "admission",
+        "facility",
+        "facilities",
+        "casualty",
+        "keycare",
+        "delta",
+        "smart",
+        "coastal",
+        "gauteng",
+        "pretoria",
+        "johannesburg",
+        "durban",
+        "cape town",
+        "which hospitals",
+        "list hospitals",
+        "find hospitals",
+    ],
     "treatment": ["treatment", "benefit", "diagnosis", "care", "basket"],
     "medication": ["medicine", "medication", "drug", "formulary", "script"],
-    "hospital": ["hospital", "network", "admission", "facility", "casualty"],
 }
 
 CONDITION_MATCHERS = {
@@ -119,9 +153,46 @@ CONDITION_MATCHERS = {
     "asthma": ["asthma", "inhaler", "wheeze", "bronchodilator"],
 }
 
+# Tokens that appear in benefit PDF boilerplate but are not chronic conditions.
+_FALSE_POSITIVE_CONDITION_TOKENS = frozenset(
+    {
+        "hospital",
+        "hospitals",
+        "management",
+        "benefits",
+        "members",
+        "member",
+        "discovery",
+        "scheme",
+        "cover",
+        "claims",
+        "claim",
+        "payment",
+        "payments",
+        "services",
+        "service",
+        "treatment",
+        "diagnosis",
+        "health",
+        "medical",
+        "conditions",
+        "condition",
+        "network",
+        "networks",
+        "facility",
+        "facilities",
+        "keycare",
+        "delta",
+        "smart",
+        "coastal",
+    }
+)
+
 
 class AskRequest(BaseModel):
     query: str = ""
+    networkCodes: list[str] | None = None
+    planId: str | None = None
 
 
 def normalize_whitespace(value: str) -> str:
@@ -172,6 +243,9 @@ CDL_CONDITIONS_DISPLAY = discover_cdl_conditions_from_medicine_pdf(_medicine_pdf
 CDL_MEDICINE_INDEX = build_medicine_index(_medicine_pdf_path)
 CDL_TREATMENT_INDEX = build_treatment_index(_treatment_pdf_path, CDL_CONDITIONS_DISPLAY)
 
+_hospital_pdf_path = ROOT / next(src["file_name"] for src in PDF_SOURCES if src["id"] == "hospital_network")
+HOSPITAL_RECORDS = parse_hospital_network_pdf(_hospital_pdf_path)
+
 
 def get_document_snippet(document_id: str, keywords: list[str]) -> dict[str, str] | None:
     document = next((entry for entry in PDF_INDEX if entry["id"] == document_id), None)
@@ -205,6 +279,8 @@ def detect_condition_from_pdfs(query: str) -> str | None:
     text = treatment_doc["text"].lower()
 
     for token in tokens:
+        if token in _FALSE_POSITIVE_CONDITION_TOKENS:
+            continue
         if token in text:
             return token
 
@@ -224,7 +300,15 @@ def create_items(items: list[str], detail: str) -> list[dict[str, str]]:
     return [{"label": item, "detail": detail} for item in items]
 
 
-def ask_authi(input_query: str) -> dict[str, Any]:
+def _network_display_names(codes: frozenset[str]) -> str:
+    """Return a human-readable joined string for a set of network codes."""
+    names = [NETWORK_LABELS.get(c, c) for c in sorted(codes)]
+    if len(names) == 1:
+        return names[0]
+    return ", ".join(names[:-1]) + " and " + names[-1]
+
+
+def ask_authi(input_query: str, explicit_network_codes: list[str] | None = None) -> dict[str, Any]:
     query = input_query.strip().lower()
 
     if not query:
@@ -235,6 +319,7 @@ def ask_authi(input_query: str) -> dict[str, Any]:
             "summary": "Try a question about diabetes, asthma, formulary cover, or which hospital network applies to planned care.",
             "sections": [],
             "sources": [],
+            "hints": [],
         }
 
     condition = get_match(query, CONDITION_MATCHERS, None)
@@ -244,7 +329,16 @@ def ask_authi(input_query: str) -> dict[str, Any]:
     if condition is None:
         # Final fallback: token-level detection against the treatment PDF.
         condition = detect_condition_from_pdfs(query)
-    intent = get_match(query, INTENT_MATCHERS, "general")
+
+    # Hospital-override: if the query clearly asks about hospitals/networks alongside
+    # plan keywords, force hospital intent before the general matcher runs.
+    _q_lower = query
+    _has_hospital_signal = any(w in _q_lower for w in ("hospital", "hospitals", "network", "which hospitals", "list hospitals"))
+    if _has_hospital_signal and ("plan" in _q_lower or "plan" in input_query.lower()):
+        intent: str | None = "hospital"
+    else:
+        intent = get_match(query, INTENT_MATCHERS, "general")
+
     condition_data = KNOWLEDGE_BASE["conditions"].get(condition) if condition else None
     sections: list[dict[str, Any]] = []
     source_snippets: list[dict[str, str]] = []
@@ -252,6 +346,110 @@ def ask_authi(input_query: str) -> dict[str, Any]:
     display_condition = (
         CDL_CONDITIONS_DISPLAY.get(condition, condition.title()) if condition else "chronic conditions"
     )
+
+    hospital_directory_province: str | None = None
+    hospital_directory_prompt = False
+    hospital_params_networks: frozenset[str] | None = None
+    response_hints: list[str] = []
+
+    if wants_hospital_directory(query) or intent == "hospital":
+        hospital_params = parse_hospital_search_params(input_query)
+
+        # Explicit network codes from the frontend always win over text resolution.
+        if explicit_network_codes:
+            hospital_params = HospitalSearchParams(
+                province=hospital_params.province,
+                networks=frozenset(explicit_network_codes),
+                town=hospital_params.town,
+                name_query=hospital_params.name_query,
+            )
+
+        hospital_params_networks = hospital_params.networks
+
+        if hospital_params.province:
+            filtered_hospitals = filter_hospital_records(
+                HOSPITAL_RECORDS,
+                province=hospital_params.province,
+                networks=hospital_params.networks,
+                town_substring=hospital_params.town,
+                name_substring=hospital_params.name_query,
+            )
+            if is_broad_keycare_network_filter(hospital_params.networks):
+                sections.append(keycare_broad_hint_section())
+                response_hints.extend(keycare_broad_hint_strings())
+            title = f"Hospitals in {hospital_params.province.title()}"
+            if hospital_params.networks:
+                title += f" (matching {', '.join(sorted(hospital_params.networks))})"
+            if hospital_params.town:
+                title += f" – {hospital_params.town.title()}"
+            flat = "flat list" in query or "single list" in query
+            sections.extend(build_hospital_sections(filtered_hospitals, title=title, flat=flat))
+            sections.append(
+                {
+                    "title": "Network codes (from the list)",
+                    "items": [
+                        {"label": f"{code} – {label}", "detail": "Codes appear next to each facility in the DHMS network PDF."}
+                        for code, label in sorted(NETWORK_LABELS.items())
+                    ],
+                }
+            )
+            snippet = get_document_snippet(
+                "hospital_network",
+                [hospital_params.province.lower(), "hospital", "network"],
+            )
+            if snippet:
+                source_snippets.append(snippet)
+            hospital_directory_province = hospital_params.province
+        else:
+            hospital_directory_prompt = True
+            provinces = sorted({row["province"] for row in HOSPITAL_RECORDS})
+
+            # When specific networks are known, show their overview before the province picker.
+            if hospital_params.networks:
+                relevant_networks = [
+                    n for n in KNOWLEDGE_BASE["hospital_networks"]
+                    if n["code"] in hospital_params.networks
+                ]
+                if relevant_networks:
+                    sections.append(
+                        {
+                            "title": "Your plan's hospital networks",
+                            "items": [
+                                {"label": f"{n['code']} – {n['name']}", "detail": n["description"]}
+                                for n in relevant_networks
+                            ],
+                        }
+                    )
+                net_names = _network_display_names(hospital_params.networks)
+                sections.append(
+                    {
+                        "title": "Select a province to list hospitals",
+                        "items": [
+                            {
+                                "label": prov.title(),
+                                "detail": f'Try: "{net_names} hospitals in {prov.lower()}"',
+                            }
+                            for prov in provinces
+                        ],
+                    }
+                )
+            else:
+                sections.append(
+                    {
+                        "title": "Hospital directory – choose a province",
+                        "items": [
+                            {
+                                "label": prov.title(),
+                                "detail": f'Try: "list all hospitals in {prov.lower()}" or "KeyCare hospitals in {prov.lower()}".',
+                            }
+                            for prov in provinces
+                        ],
+                    }
+                )
+
+            snippet = get_document_snippet("hospital_network", ["hospital", "network", "province"])
+            if snippet:
+                source_snippets.append(snippet)
 
     if intent in ("general", "treatment"):
         if condition and condition in CDL_TREATMENT_INDEX and CDL_TREATMENT_INDEX[condition]:
@@ -347,10 +545,10 @@ def ask_authi(input_query: str) -> dict[str, Any]:
         if snippet:
             source_snippets.append(snippet)
 
-    if intent == "hospital" or (not condition_data and intent == "general"):
+    if intent == "hospital" and hospital_directory_province is None and not hospital_directory_prompt:
         sections.append(
             {
-                "title": "Hospital networks",
+                "title": "Hospital networks (overview)",
                 "items": [
                     {
                         "label": f"{network['code']} - {network['name']}",
@@ -375,17 +573,40 @@ def ask_authi(input_query: str) -> dict[str, Any]:
             }
         )
 
-    return {
-        "intent": intent,
-        "condition": condition,
-        "headline": condition_data["title"] if condition_data else f"Support for {display_condition}",
-        "summary": (
+    if hospital_directory_province:
+        headline = (
+            f"DHMS hospitals ({hospital_directory_province.title()}) · {display_condition}"
+            if condition
+            else f"DHMS hospital network directory – {hospital_directory_province.title()}"
+        )
+        summary = f"Facilities are parsed from the 2026 DHMS hospital network list for {hospital_directory_province.title()}."
+    elif hospital_directory_prompt:
+        if hospital_params_networks:
+            net_names_str = _network_display_names(hospital_params_networks)
+            headline = f"{net_names_str} – select a province"
+            summary = (
+                f"Your plan uses the {net_names_str}. "
+                "Pick a province below to list all facilities, or include a province in your question above."
+            )
+        else:
+            headline = "DHMS hospital directory"
+            summary = "Ask with a province (for example Gauteng or Western Cape) to list facilities from the 2026 DHMS network PDF."
+    else:
+        headline = condition_data["title"] if condition_data else f"Support for {display_condition}"
+        summary = (
             condition_data["summary"]
             if condition_data
             else "Authi uses the full PMB Chronic Disease List and benefit PDFs to guide members towards treatment baskets, formulary cover, and hospital-network information."
-        ),
+        )
+
+    return {
+        "intent": intent,
+        "condition": condition,
+        "headline": headline,
+        "summary": summary,
         "sections": sections,
         "sources": source_snippets,
+        "hints": response_hints,
     }
 
 
@@ -412,4 +633,50 @@ def health() -> dict[str, Any]:
 
 @app.post("/api/ask")
 def ask(request: AskRequest) -> dict[str, Any]:
-    return ask_authi(request.query)
+    return ask_authi(request.query, explicit_network_codes=request.networkCodes or None)
+
+
+@app.get("/api/hospitals/search")
+def search_hospitals(
+    province: str,
+    network: str | None = None,
+    town: str | None = None,
+    q: str | None = None,
+    flat: bool = Query(False, description="If true, return one flat list instead of per-town sections."),
+) -> dict[str, Any]:
+    prov = canonical_province(province)
+    if not prov:
+        return {
+            "error": "unknown_province",
+            "message": "Pass a province such as gauteng, western cape, or kzn.",
+            "knownProvinces": sorted({row["province"] for row in HOSPITAL_RECORDS}),
+        }
+
+    nets = parse_network_filter(network)
+    filtered = filter_hospital_records(
+        HOSPITAL_RECORDS,
+        province=prov,
+        networks=nets,
+        town_substring=town,
+        name_substring=q,
+    )
+    title = f"Hospitals in {prov.title()}"
+    if nets:
+        title += f" (matching {', '.join(sorted(nets))})"
+    if town:
+        title += f" – {town.title()}"
+
+    sections = build_hospital_sections(filtered, title=title, flat=flat)
+    hints: list[str] = []
+    if is_broad_keycare_network_filter(nets):
+        sections = [keycare_broad_hint_section(), *sections]
+        hints = keycare_broad_hint_strings()
+    return {
+        "province": prov,
+        "networks": sorted(nets) if nets else None,
+        "town": town,
+        "nameQuery": q,
+        "count": len(filtered),
+        "sections": sections,
+        "hints": hints,
+    }
