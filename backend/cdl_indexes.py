@@ -9,11 +9,38 @@ import fitz
 
 _R_AMOUNT_RE = re.compile(r"^R\d+\b", re.IGNORECASE)
 _FOUR_DIGIT_RE = re.compile(r"\d{4}")
+_FOUR_DIGIT_AT_START_RE = re.compile(r"^\d{4}")
 _COUNT_RE = re.compile(r"^\d{1,2}$")
 _MED_STRENGTH_RE = re.compile(
     r"\b(\d+(?:\.\d+)?\s*(?:mg|mcg|g|ml|iu|units)\b|\b\d+\s*dose\b|\b\d+/\d+\s*mg\b|\b\d+/\d+\b)",
     re.IGNORECASE,
 )
+
+_MEDICINE_NOISE_WORDS = frozenset({
+    "procedure", "description", "number", "code", "test", "basket", "quantity",
+    "diagnostic", "ongoing", "management", "formulary", "benefit", "schedule",
+    "page", "continued", "table", "contents",
+})
+
+
+def _looks_like_medicine(line: str) -> bool:
+    """Return True if a line looks like a medicine name worth capturing."""
+    stripped = line.strip()
+    if not stripped:
+        return False
+    if not any(c.isalpha() for c in stripped):
+        return False
+    if _R_AMOUNT_RE.match(stripped):
+        return False
+    if re.fullmatch(r"[\d\s\-/]+", stripped):
+        return False
+    lower = stripped.lower()
+    if any(w in lower for w in _MEDICINE_NOISE_WORDS):
+        return False
+    # Skip very short strings that are likely column headers or noise
+    if len(stripped) < 3:
+        return False
+    return True
 
 
 @dataclass(frozen=True)
@@ -21,6 +48,19 @@ class TreatmentItem:
     desc: str
     code: str
     count: int
+    item_type: str = "diagnostic"  # "diagnostic" | "ongoing"
+
+
+# Exact strings that appear as standalone column-header lines in the treatment PDF.
+# We reject these lines when collecting procedure descriptions to avoid mis-classification.
+_TREATMENT_HEADER_LINES: frozenset[str] = frozenset({
+    "PROCEDURE OR", "TEST DESCRIPTION", "PROCEDURE OR TEST DESCRIPTION",
+    "PROCEDURE", "OR TEST CODE", "OR TEST", "OR TEST DESCRIPTION",
+    "PROCEDURE OR TEST CODE", "CODE", "NUMBER OF", "PROCEDURES",
+    "OR TESTS WE", "COVER", "ONGOING MANAGEMENT BASKET", "DIAGNOSTIC BASKET",
+    "CONDITION", "TEST", "DESCRIPTION", "PROCEDURE CODE",
+    "NUMBER OF PROCEDURES OR TESTS WE COVER",
+})
 
 
 def _iter_pdf_lines(pdf_path: Path) -> list[str]:
@@ -199,8 +239,8 @@ def build_medicine_index(medicine_pdf_path: Path) -> dict[str, list[dict[str, st
             i += 1
             continue
 
-        # Capture medicine-name rows (usually contain strengths/dose)
-        if _MED_STRENGTH_RE.search(line) and any(ch.isalpha() for ch in line):
+        # Capture medicine-name rows — generic names and strength-bearing lines alike
+        if _looks_like_medicine(line):
             detail = "Formulary medicine (from the CIB medicine list)."
             if pending_note:
                 detail = f"{detail} Note: {pending_note}."
@@ -231,9 +271,11 @@ def build_treatment_index(
     """
     Build a per-condition treatment basket index from the treatment baskets PDF.
 
-    We parse the "DIAGNOSTIC BASKET" and "ONGOING MANAGEMENT BASKET" tables by:
-    - Detecting condition headings (from the medicine PDF discovery)
-    - Parsing items as: description lines -> code block (contains 4-digit codes) -> count (integer)
+    The PDF table has paired rows: each treatment appears twice — first with the
+    diagnostic count, then with the ongoing management count.  We track occurrence
+    order to label each item 'diagnostic' or 'ongoing'.
+
+    Returns {conditionKey: [{label, detail, type, desc, code, count}]}
     """
     condition_keys = set(_canonical_condition_keys())
     lines = _iter_pdf_lines(treatment_pdf_path)
@@ -243,6 +285,8 @@ def build_treatment_index(
     in_table = False
     current: str | None = None
     mirror_keys: list[str] = []
+    # Track how many times each (desc, code) pair has appeared per condition
+    occurrence_counter: dict[str, dict[tuple[str, str], int]] = {}
     i = 0
 
     while i < len(lines):
@@ -250,7 +294,6 @@ def build_treatment_index(
         upper = line.upper()
         header = re.sub(r"^\d+\s+", "", upper)
         if header == "DIAGNOSTIC BASKET":
-            # This marks the start of the large treatment basket table.
             in_table = True
             current = None
             mirror_keys = []
@@ -261,47 +304,58 @@ def build_treatment_index(
             match = _match_cdl_condition_heading(lines, i)
             if match:
                 keys, consumed = match
-                # Use the first key as the "current" condition; if the PDF uses
-                # a combined diabetes heading we still index items under both types
-                # by duplicating inserts later.
                 current = keys[0] if keys else None
-                # Store any additional keys to mirror inserts to (e.g. diabetes types 1 & 2).
                 mirror_keys = [k for k in keys[1:] if k in condition_keys]
+                # Reset occurrence counter when we move to a new condition.
+                if current and current not in occurrence_counter:
+                    occurrence_counter[current] = {}
+                for mk in mirror_keys:
+                    if mk not in occurrence_counter:
+                        occurrence_counter[mk] = {}
                 i += consumed
-                # Skip any empty lines already stripped by _iter_pdf_lines.
                 continue
 
         if not in_table or current is None:
             i += 1
             continue
 
-        # Attempt to parse one item row: desc -> code (4-digit) -> count (small int)
+        # Collect description lines until we hit a 4-digit code or a count.
         desc_lines: list[str] = []
-        while i < len(lines) and not _FOUR_DIGIT_RE.search(lines[i]) and not _COUNT_RE.match(lines[i]) and _normalize_condition_name(lines[i]) not in condition_keys:
-            # Guard against table headers / noise.
-            header = lines[i].upper()
-            if any(token in header for token in ("PROCEDURE", "DESCRIPTION", "NUMBER OF", "CODE", "TEST")):
+        while i < len(lines):
+            cur = lines[i].strip()
+            if _FOUR_DIGIT_AT_START_RE.match(cur) or _COUNT_RE.match(cur):
+                break
+            if _normalize_condition_name(cur) in condition_keys:
+                break
+            # Skip exact table column-header lines.
+            if cur.upper() in _TREATMENT_HEADER_LINES:
                 i += 1
                 continue
-            desc_lines.append(lines[i].strip())
+            # Skip long boilerplate sentences (page footers / overview text).
+            if len(cur) > 120:
+                i += 1
+                continue
+            desc_lines.append(cur)
             i += 1
 
         if i >= len(lines) or _normalize_condition_name(lines[i]) in condition_keys:
             continue
 
-        # If we didn't capture a description, skip.
         desc = " ".join([d for d in desc_lines if d]).strip()
         if not desc:
             i += 1
             continue
 
-        if i >= len(lines) or not _FOUR_DIGIT_RE.search(lines[i]):
+        if not _FOUR_DIGIT_AT_START_RE.match(lines[i]):
             i += 1
             continue
 
+        # Collect code lines.
         code_lines: list[str] = []
         while i < len(lines) and not _COUNT_RE.match(lines[i]):
             if _normalize_condition_name(lines[i]) in condition_keys:
+                break
+            if not _FOUR_DIGIT_AT_START_RE.match(lines[i]) and not _FOUR_DIGIT_RE.search(lines[i]):
                 break
             code_lines.append(lines[i].strip())
             i += 1
@@ -310,24 +364,35 @@ def build_treatment_index(
             continue
 
         count = int(lines[i])
-        # Counts in baskets are small; skip if we accidentally hit a code.
         if count > 30:
             i += 1
             continue
         i += 1
 
         code = " ".join(code_lines).strip()
-        index[current].append(TreatmentItem(desc=desc, code=code, count=count))
-        for mk in mirror_keys:
-            index[mk].append(TreatmentItem(desc=desc, code=code, count=count))
 
-    # Convert and de-dupe
+        # Determine type: first occurrence of (desc, code) = diagnostic, second = ongoing.
+        pair = (desc, code)
+        occ = occurrence_counter.setdefault(current, {})
+        n = occ.get(pair, 0)
+        occ[pair] = n + 1
+        item_type = "diagnostic" if n == 0 else "ongoing"
+
+        index[current].append(TreatmentItem(desc=desc, code=code, count=count, item_type=item_type))
+        for mk in mirror_keys:
+            mk_occ = occurrence_counter.setdefault(mk, {})
+            mn = mk_occ.get(pair, 0)
+            mk_occ[pair] = mn + 1
+            mk_type = "diagnostic" if mn == 0 else "ongoing"
+            index[mk].append(TreatmentItem(desc=desc, code=code, count=count, item_type=mk_type))
+
+    # Convert and de-dupe (keeping both diagnostic and ongoing for the same desc+code).
     result: dict[str, list[dict[str, str]]] = {}
     for condition, items in index.items():
-        seen: set[tuple[str, str, int]] = set()
+        seen: set[tuple[str, str, int, str]] = set()
         result[condition] = []
         for item in items:
-            key_tuple = (item.desc, item.code, item.count)
+            key_tuple = (item.desc, item.code, item.count, item.item_type)
             if key_tuple in seen:
                 continue
             seen.add(key_tuple)
@@ -335,6 +400,10 @@ def build_treatment_index(
                 {
                     "label": f"{item.desc} ({item.code})",
                     "detail": f"Up to {item.count} time(s) per year (per the treatment basket).",
+                    "type": item.item_type,
+                    "desc": item.desc,
+                    "code": item.code,
+                    "count": item.count,
                 }
             )
     return result

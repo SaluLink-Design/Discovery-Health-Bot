@@ -1,20 +1,34 @@
 import { useState } from 'react';
 import DashboardView from './components/DashboardView';
+import DoctorView from './components/DoctorView';
 import HospitalNetworkView from './components/HospitalNetworkView';
 import MedicationView from './components/MedicationView';
 import PatientProfilePanel from './components/PatientProfilePanel';
 import TopNav from './components/TopNav';
 import TreatmentView from './components/TreatmentView';
 import { loadProfile, saveProfile } from './lib/profileStore';
+import { loadPrescriptions, savePrescriptions, seedDemoData } from './lib/prescriptionStore';
 
 export default function App() {
   const [profile, setProfile] = useState(() => loadProfile());
   const [isEditingProfile, setIsEditingProfile] = useState(!loadProfile());
   const [currentView, setCurrentView] = useState('dashboard');
+  const [prescriptions, setPrescriptions] = useState(() => {
+    const p = loadProfile();
+    const existing = loadPrescriptions();
+    const isEmpty = Object.keys(existing).length === 0;
+    return isEmpty && p ? seedDemoData(p) : existing;
+  });
+
+  const handlePrescriptionsChange = (updated) => {
+    savePrescriptions(updated);
+    setPrescriptions(updated);
+  };
 
   const handleProfileSave = (newProfile) => {
     saveProfile(newProfile);
     setProfile(newProfile);
+    setPrescriptions(seedDemoData(newProfile));
     setIsEditingProfile(false);
     setCurrentView('dashboard');
   };
@@ -67,13 +81,26 @@ export default function App() {
           <HospitalNetworkView profile={profile} onNavigate={setCurrentView} />
         )}
         {currentView === 'treatment'  && (
-          <TreatmentView profile={profile} onNavigate={setCurrentView} />
+          <TreatmentView
+            profile={profile}
+            onNavigate={setCurrentView}
+            prescriptions={prescriptions}
+          />
         )}
         {currentView === 'medication' && (
           <MedicationView
             profile={profile}
             onNavigate={setCurrentView}
             onEditProfile={handleEditProfile}
+            prescriptions={prescriptions}
+          />
+        )}
+        {currentView === 'doctor' && (
+          <DoctorView
+            profile={profile}
+            onNavigate={setCurrentView}
+            prescriptions={prescriptions}
+            onPrescriptionsChange={handlePrescriptionsChange}
           />
         )}
       </main>

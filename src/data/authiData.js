@@ -123,18 +123,16 @@ export const CDL_CONDITION_DETAILS = {
       'Authi can point members to likely benefit areas for diagnosis, medicine cover, and network treatment options.',
     treatment: {
       diagnostic: [
-        { code: 'AST-101', desc: 'Lung function testing', count: 1 },
-        { code: 'AST-102', desc: 'Initial GP or specialist consultation', count: 2 },
+        { code: '1188 or 1186', desc: 'Flow volume test (spirometry)', count: 1 },
       ],
       ongoing: [
-        { code: 'AST-201', desc: 'Routine review consultation', count: 2 },
-        { code: 'AST-202', desc: 'Peak flow or symptom monitoring support', count: 2 },
+        { code: '1192', desc: 'Peak flow monitoring', count: 3 },
       ],
     },
     medications: [
-      'Inhaled corticosteroids',
-      'Combination controller inhalers',
-      'Reliever inhalers',
+      'Ventimax CFC free 200 dose 100mcg',
+      'Symbicord turbohaler 60 dose 160/4.5mcg',
+      'Atrovent HFA 200 dose 20mcg',
     ],
     guidance: [
       'Use approved medicine lists first to avoid unnecessary copayments.',

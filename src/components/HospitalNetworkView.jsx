@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  PROVINCES,
   formatPlanNetworkSummary,
   getPlanFromProfile,
   getPlanHospitalNetworks,
@@ -7,18 +8,6 @@ import {
 } from '../lib/profileContext';
 import FeaturePageHeader from './FeaturePageHeader';
 import ResultCard from './ResultCard';
-
-const PROVINCES = [
-  { value: 'GAUTENG', label: 'Gauteng' },
-  { value: 'KWAZULU-NATAL', label: 'KwaZulu-Natal' },
-  { value: 'WESTERN CAPE', label: 'Western Cape' },
-  { value: 'EASTERN CAPE', label: 'Eastern Cape' },
-  { value: 'MPUMALANGA', label: 'Mpumalanga' },
-  { value: 'LIMPOPO', label: 'Limpopo' },
-  { value: 'NORTH WEST', label: 'North West' },
-  { value: 'FREE STATE', label: 'Free State' },
-  { value: 'NORTHERN CAPE', label: 'Northern Cape' },
-];
 
 const selectClass =
   'w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-200 outline-none focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/20 appearance-none';
@@ -29,12 +18,23 @@ export default function HospitalNetworkView({ profile, onNavigate }) {
   const unrestricted = isUnrestrictedHospitalPlan(profile);
   const networkSummary = formatPlanNetworkSummary(profile);
 
-  const [province, setProvince] = useState('');
-  const [town, setTown] = useState('');
+  const [province, setProvince] = useState(profile?.province ?? '');
+  const [town, setTown] = useState(profile?.town ?? '');
+  const hasProfileLocation = Boolean(profile?.province || profile?.town);
+  const [towns, setTowns] = useState([]);
   const [searchOutsidePlan, setSearchOutsidePlan] = useState(false);
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (province) params.append('province', province);
+    fetch(`/api/hospitals/towns?${params}`)
+      .then((r) => r.json())
+      .then((data) => setTowns(data.towns ?? []))
+      .catch(() => {});
+  }, [province]);
 
   const applyPlanNetworks = planNetworks && !searchOutsidePlan;
 
@@ -111,12 +111,16 @@ export default function HospitalNetworkView({ profile, onNavigate }) {
             <label className="mb-1.5 block text-xs font-medium text-slate-400">Town (optional)</label>
             <input
               type="text"
+              list="hospital-towns-list"
               value={town}
               onChange={(e) => setTown(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="e.g. Sandton"
+              placeholder="e.g. Johannesburg"
               className="w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-200 outline-none placeholder:text-slate-600 focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/20"
             />
+            <datalist id="hospital-towns-list">
+              {towns.map((t) => <option key={t} value={t} />)}
+            </datalist>
           </div>
 
           <div className="flex items-end">
@@ -130,6 +134,23 @@ export default function HospitalNetworkView({ profile, onNavigate }) {
             </button>
           </div>
         </div>
+
+        {hasProfileLocation && (
+          <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+            <svg className="h-3.5 w-3.5 text-cyan-400/70" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+            </svg>
+            Using your saved location
+            <button
+              type="button"
+              onClick={() => { setProvince(''); setTown(''); }}
+              className="ml-1 text-slate-600 underline underline-offset-2 hover:text-cyan-300"
+            >
+              Clear
+            </button>
+          </p>
+        )}
 
         {planNetworks && (
           <label className="mt-4 flex cursor-pointer items-center gap-2 text-xs text-slate-500">

@@ -1,5 +1,17 @@
 import { CDL_CONDITIONS, DISCOVERY_PLANS } from '../data/authiData';
 
+export const PROVINCES = [
+  { value: 'GAUTENG', label: 'Gauteng' },
+  { value: 'KWAZULU-NATAL', label: 'KwaZulu-Natal' },
+  { value: 'WESTERN CAPE', label: 'Western Cape' },
+  { value: 'EASTERN CAPE', label: 'Eastern Cape' },
+  { value: 'MPUMALANGA', label: 'Mpumalanga' },
+  { value: 'LIMPOPO', label: 'Limpopo' },
+  { value: 'NORTH WEST', label: 'North West' },
+  { value: 'FREE STATE', label: 'Free State' },
+  { value: 'NORTHERN CAPE', label: 'Northern Cape' },
+];
+
 const UNRESTRICTED_PLAN_IDS = new Set(['comprehensive', 'executive']);
 
 const NETWORK_CODE_LABELS = {

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CDL_CONDITIONS, DISCOVERY_PLANS } from '../data/authiData';
+import { PROVINCES } from '../lib/profileContext';
 
 const CONDITION_PAGE_SIZE = 8;
 
@@ -42,7 +43,19 @@ export default function PatientProfilePanel({ onSave, onEdit, isEditing, savedPr
   const [name, setName] = useState(savedProfile?.name ?? '');
   const [plan, setPlan] = useState(savedProfile?.plan ?? '');
   const [conditions, setConditions] = useState(savedProfile?.conditions ?? []);
+  const [province, setProvince] = useState(savedProfile?.province ?? '');
+  const [town, setTown] = useState(savedProfile?.town ?? '');
+  const [towns, setTowns] = useState([]);
   const [showAllConditions, setShowAllConditions] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (province) params.append('province', province);
+    fetch(`/api/hospitals/towns?${params}`)
+      .then((r) => r.json())
+      .then((data) => setTowns(data.towns ?? []))
+      .catch(() => {});
+  }, [province]);
 
   const visibleConditions = showAllConditions
     ? CDL_CONDITIONS
@@ -57,7 +70,7 @@ export default function PatientProfilePanel({ onSave, onEdit, isEditing, savedPr
   const handleSave = (event) => {
     event.preventDefault();
     if (!plan) return;
-    onSave({ name: name.trim(), plan, conditions });
+    onSave({ name: name.trim(), plan, conditions, province, town: town.trim() });
   };
 
   if (!isEditing && savedProfile) {
@@ -135,6 +148,48 @@ export default function PatientProfilePanel({ onSave, onEdit, isEditing, savedPr
             placeholder="e.g. Thula"
             className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/30"
           />
+        </div>
+
+        {/* Location */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="profile-province" className="text-sm font-medium text-slate-200">
+              Province <span className="text-slate-500">(optional)</span>
+            </label>
+            <div className="relative mt-2">
+              <select
+                id="profile-province"
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
+                className="w-full appearance-none rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/30"
+              >
+                <option value="">Select province…</option>
+                {PROVINCES.map((p) => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+              <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="profile-town" className="text-sm font-medium text-slate-200">
+              Town / suburb <span className="text-slate-500">(optional)</span>
+            </label>
+            <input
+              id="profile-town"
+              type="text"
+              list="profile-towns-list"
+              value={town}
+              onChange={(e) => setTown(e.target.value)}
+              placeholder="e.g. Randburg"
+              className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/30"
+            />
+            <datalist id="profile-towns-list">
+              {towns.map((t) => <option key={t} value={t} />)}
+            </datalist>
+          </div>
         </div>
 
         {/* Plan */}

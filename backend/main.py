@@ -684,3 +684,188 @@ def search_hospitals(
         "sections": sections,
         "hints": hints,
     }
+
+
+_FRONTEND_TO_CDL_KEY: dict[str, str] = {
+    "addisons": "addison's disease",
+    "asthma": "asthma",
+    "bronchiectasis": "bronchiectasis",
+    "cardiac_failure": "cardiac failure",
+    "cardiomyopathy": "cardiomyopathy",
+    "copd": "chronic obstructive pulmonary disease",
+    "coronary_artery": "coronary artery disease",
+    "crohns": "crohn's disease",
+    "diabetes_insipidus": "diabetes insipidus",
+    "diabetes_type1": "diabetes mellitus type 1",
+    "diabetes_type2": "diabetes mellitus type 2",
+    "dysrhythmias": "dysrhythmias",
+    "epilepsy": "epilepsy",
+    "glaucoma": "glaucoma",
+    "haemophilia": "haemophilia",
+    "hiv": "hiv",
+    "hyperlipidaemia": "hyperlipidaemia",
+    "hypertension": "hypertension",
+    "hypothyroidism": "hypothyroidism",
+    "multiple_sclerosis": "multiple sclerosis",
+    "parkinsons": "parkinson's disease",
+    "rheumatoid_arthritis": "rheumatoid arthritis",
+    "schizophrenia": "schizophrenia",
+    "lupus": "systemic lupus erythematosus",
+    "ulcerative_colitis": "ulcerative colitis",
+}
+
+import re as _re
+
+_HAS_STRENGTH_RE = _re.compile(
+    r"\d+\s*(?:mg|mcg|g\b|ml\b|iu\b|units\b|dose\b)|(\d+/\d+)", re.IGNORECASE
+)
+_NOISE_WORDS = frozenset({
+    "chronic", "disease", "condition", "cda", "core", "priority", "saver",
+    "plans", "executive", "comprehensive", "medicine", "class", "active",
+    "ingredient", "formulary", "benefit", "schedule", "table", "page",
+    "list", "and", "for", "the", "of", "plain",
+})
+_CLASS_TERMS = (
+    "inhibitor", "blocker", "agonist", "antagonist", "corticosteroid",
+    "diuretic", "glycoside", "anticholinerg", "adrenerg", "receptor",
+    "nasal", "systemic", "leukotriene", "xanth", "glucocorticoid",
+    "combinations", "preparation",
+)
+# Single pharmacological active ingredient names — appear in PDF as sub-headings
+_ACTIVE_ING_NAMES = frozenset({
+    "formoterol", "salbutamol", "salmeterol", "beclomethasone", "budesonide",
+    "mometasone", "fluticasone", "vilanterol", "ipratropium", "tiotropium",
+    "montelukast", "zafirlukast", "prednisone", "prednisolone", "theophylline",
+    "aminophylline", "bromide", "glycopyrronium", "indacaterol",
+    "enalapril", "lisinopril", "perindopril", "ramipril", "captopril",
+    "losartan", "valsartan", "irbesartan", "candesartan", "olmesartan",
+    "amlodipine", "nifedipine", "felodipine", "lercanidipine",
+    "bisoprolol", "atenolol", "metoprolol", "carvedilol", "nebivolol",
+    "hydrochlorothiazide", "furosemide", "spironolactone", "indapamide",
+    "metformin", "glimepiride", "gliclazide", "glipizide", "glibenclamide",
+    "insulin", "levothyroxine", "atorvastatin", "simvastatin", "rosuvastatin",
+    "amlodipine", "combinations", "furoate",
+})
+_CONNECTOR_WORDS = frozenset({"and", "or", "with", "plus", "/"})
+
+
+def _is_active_ingredient_label(label: str) -> bool:
+    """True when label is a pharmacological name used as a sub-heading (no dosage)."""
+    if _HAS_STRENGTH_RE.search(label):
+        return False
+    words = [w.lower() for w in _re.split(r"[\s,/&]+", label.strip()) if w]
+    significant = [w for w in words if w not in _CONNECTOR_WORDS]
+    return bool(significant) and all(w in _ACTIVE_ING_NAMES for w in significant)
+
+
+def _classify_med_item(label: str) -> str:
+    """Return 'class', 'medicine', or 'noise'."""
+    stripped = label.strip()
+    if len(stripped) < 3:
+        return "noise"
+    words = [w.lower() for w in _re.split(r"\W+", stripped) if w]
+    if words and all(w in _NOISE_WORDS for w in words):
+        return "noise"
+    if stripped.isupper() and len(words) <= 4:
+        return "noise"
+    has_strength = bool(_HAS_STRENGTH_RE.search(stripped))
+    if has_strength:
+        return "medicine"
+    ends_colon = stripped.endswith(":")
+    has_class_term = any(t in stripped.lower() for t in _CLASS_TERMS)
+    subclass_prefix = bool(_re.match(r"(?:short|long)\s+acting", stripped, _re.IGNORECASE))
+    if ends_colon or has_class_term or subclass_prefix or _is_active_ingredient_label(stripped):
+        return "class"
+    return "medicine"
+
+
+@app.get("/api/treatments")
+def get_treatments_for_condition(condition_id: str) -> dict[str, Any]:
+    """Return diagnostic and ongoing treatment basket items from the CDL treatment PDF."""
+    cdl_key = _FRONTEND_TO_CDL_KEY.get(condition_id, condition_id.replace("_", " "))
+    raw_items: list[dict] = CDL_TREATMENT_INDEX.get(cdl_key, [])
+
+    def _clean(items: list[dict]) -> list[dict]:
+        """Return a cleaned subset — strip obvious PDF noise."""
+        result = []
+        for it in items:
+            desc = it.get("desc", "").strip()
+            # Skip items where the description looks like a PDF page header or boilerplate.
+            if not desc or len(desc) > 80:
+                continue
+            if any(noise in desc.upper() for noise in (
+                "TREATMENT BASKETS", "CHRONIC DISEASE LIST", "DISCOVERY HEALTH MEDICAL SCHEME",
+                "REGISTRATION NUMBER",
+            )):
+                continue
+            result.append({
+                "desc": desc,
+                "code": it.get("code", ""),
+                "count": it.get("count", 1),
+            })
+        return result
+
+    diagnostic = _clean([it for it in raw_items if it.get("type") == "diagnostic"])
+    ongoing = _clean([it for it in raw_items if it.get("type") == "ongoing"])
+
+    return {"conditionId": condition_id, "diagnostic": diagnostic, "ongoing": ongoing}
+
+
+@app.get("/api/medications")
+def get_medications_for_condition(condition_id: str) -> dict[str, Any]:
+    """Return a cleaned flat medicine list from the Chronic Illness Benefit PDF.
+
+    Each medicine entry includes a ``classHint`` — the raw class/sub-heading text
+    that preceded it in the PDF.  The frontend normalises these hints into clean
+    pharmacological class names and handles grouping + coverage display.
+    """
+    cdl_key = _FRONTEND_TO_CDL_KEY.get(condition_id, condition_id.replace("_", " "))
+    raw_items: list[dict[str, str]] = CDL_MEDICINE_INDEX.get(cdl_key, [])
+
+    medicines: list[dict] = []
+    pending_class_parts: list[str] = []
+    current_class_hint: str = ""
+
+    for item in raw_items:
+        label = item["label"].strip()
+        detail = item.get("detail", "")
+        kind = _classify_med_item(label)
+
+        if kind == "noise":
+            continue
+
+        if kind == "class":
+            pending_class_parts.append(label.rstrip(":").strip())
+            continue
+
+        # It's a medicine — lock in any pending class hint
+        if pending_class_parts:
+            current_class_hint = " ".join(pending_class_parts)
+            pending_class_parts.clear()
+
+        not_covered_keycare = bool(_re.search(r"not available on keycare", detail, _re.IGNORECASE))
+        exec_comp_only = bool(_re.search(r"executive and comprehensive", detail, _re.IGNORECASE))
+        note_match = _re.search(r"note:\s*(.+?)\.?\s*$", detail, _re.IGNORECASE)
+        note = note_match.group(1).strip() if note_match else ""
+
+        medicines.append({
+            "label": label,
+            "classHint": current_class_hint,
+            "note": note,
+            "notCoveredKeycare": not_covered_keycare,
+            "execCompOnly": exec_comp_only,
+        })
+
+    return {"conditionId": condition_id, "medicines": medicines}
+
+
+@app.get("/api/hospitals/towns")
+def get_hospital_towns(province: str | None = None) -> dict[str, Any]:
+    """Return sorted unique town names from the hospital directory, optionally filtered by province."""
+    records = HOSPITAL_RECORDS
+    if province:
+        prov = canonical_province(province)
+        if prov:
+            records = [r for r in records if r["province"] == prov]
+    towns = sorted({r["town"] for r in records if r.get("town")})
+    return {"towns": towns}
