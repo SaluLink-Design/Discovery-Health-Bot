@@ -14,6 +14,10 @@ from backend.cdl_indexes import (
     build_treatment_index,
     discover_cdl_conditions_from_medicine_pdf,
 )
+from backend.hospital_geo import (
+    build_nearby_hospital_results,
+    resolve_user_location,
+)
 from backend.hospital_network_index import (
     NETWORK_LABELS,
     HospitalSearchParams,
@@ -686,6 +690,73 @@ def search_hospitals(
     }
 
 
+@app.get("/api/hospitals/nearby")
+def hospitals_nearby(
+    province: str,
+    lat: float | None = Query(None, description="User latitude (device GPS)."),
+    lng: float | None = Query(None, description="User longitude (device GPS)."),
+    town: str | None = None,
+    networks: str | None = Query(
+        None,
+        description="Comma-separated plan network codes for on-plan matching.",
+    ),
+    limit_on: int = Query(3, ge=1, le=10),
+    limit_off: int = Query(3, ge=0, le=10),
+) -> dict[str, Any]:
+    prov = canonical_province(province)
+    if not prov:
+        return {
+            "error": "unknown_province",
+            "message": "Pass a province such as gauteng, western cape, or kzn.",
+            "knownProvinces": sorted({row["province"] for row in HOSPITAL_RECORDS}),
+        }
+
+    location = resolve_user_location(lat=lat, lng=lng, province=prov, town=town)
+    if not location:
+        return {
+            "error": "no_location",
+            "message": "Could not determine your location. Add town and province to your profile, or allow location access.",
+        }
+
+    user_lat, user_lng, location_source = location
+    nets = merge_network_filters(networks, None)
+    unrestricted = nets is None
+
+    province_records = filter_hospital_records(
+        HOSPITAL_RECORDS,
+        province=prov,
+        networks=None,
+        town_substring=None,
+        name_substring=None,
+    )
+
+    nearby = build_nearby_hospital_results(
+        province_records,
+        user_lat=user_lat,
+        user_lng=user_lng,
+        plan_networks=nets,
+        unrestricted=unrestricted,
+        limit_on=limit_on,
+        limit_off=limit_off,
+    )
+
+    hints: list[str] = []
+    if is_broad_keycare_network_filter(nets):
+        hints = keycare_broad_hint_strings()
+
+    return {
+        "province": prov,
+        "town": town,
+        "networks": sorted(nets) if nets else None,
+        "locationSource": location_source,
+        "userLat": user_lat,
+        "userLng": user_lng,
+        "onPlan": nearby["onPlan"],
+        "offPlan": nearby["offPlan"],
+        "hints": hints,
+    }
+
+
 _FRONTEND_TO_CDL_KEY: dict[str, str] = {
     "addisons": "addison's disease",
     "asthma": "asthma",
@@ -758,6 +829,31 @@ def _is_active_ingredient_label(label: str) -> bool:
     return bool(significant) and all(w in _ACTIVE_ING_NAMES for w in significant)
 
 
+def _extract_ingredient_from_class_hint(hint: str) -> str:
+    """Derive the active-ingredient label from a PDF class-hint string."""
+    if not hint:
+        return ""
+    cleaned = hint.strip().rstrip(":")
+    if not cleaned:
+        return ""
+    parts = [p for p in _re.split(r"\s+", cleaned) if p]
+    if len(parts) >= 2 and parts[-1].lower() == parts[-2].lower():
+        return parts[-1]
+    lower = cleaned.lower()
+    for name in sorted(_ACTIVE_ING_NAMES, key=len, reverse=True):
+        if lower.endswith(name) and (len(lower) == len(name) or not lower[-len(name) - 1].isalnum()):
+            idx = lower.rfind(name)
+            return cleaned[idx:].strip()
+    if " and " in lower and not _HAS_STRENGTH_RE.search(cleaned):
+        return cleaned
+    if len(parts) <= 4 and not _HAS_STRENGTH_RE.search(cleaned):
+        return cleaned
+    last = parts[-1].rstrip(",")
+    if last.lower() in _ACTIVE_ING_NAMES:
+        return last
+    return ""
+
+
 def _classify_med_item(label: str) -> str:
     """Return 'class', 'medicine', or 'noise'."""
     stripped = label.strip()
@@ -825,6 +921,7 @@ def get_medications_for_condition(condition_id: str) -> dict[str, Any]:
     medicines: list[dict] = []
     pending_class_parts: list[str] = []
     current_class_hint: str = ""
+    current_ingredient: str = ""
 
     for item in raw_items:
         label = item["label"].strip()
@@ -835,26 +932,40 @@ def get_medications_for_condition(condition_id: str) -> dict[str, Any]:
             continue
 
         if kind == "class":
-            pending_class_parts.append(label.rstrip(":").strip())
+            part = label.rstrip(":").strip()
+            pending_class_parts.append(part)
+            if _is_active_ingredient_label(part):
+                current_ingredient = part
             continue
 
         # It's a medicine — lock in any pending class hint
         if pending_class_parts:
             current_class_hint = " ".join(pending_class_parts)
+            for part in reversed(pending_class_parts):
+                if _is_active_ingredient_label(part):
+                    current_ingredient = part
+                    break
             pending_class_parts.clear()
 
         not_covered_keycare = bool(_re.search(r"not available on keycare", detail, _re.IGNORECASE))
         exec_comp_only = bool(_re.search(r"executive and comprehensive", detail, _re.IGNORECASE))
         note_match = _re.search(r"note:\s*(.+?)\.?\s*$", detail, _re.IGNORECASE)
         note = note_match.group(1).strip() if note_match else ""
+        ingredient_hint = current_ingredient or _extract_ingredient_from_class_hint(current_class_hint)
 
-        medicines.append({
+        entry: dict[str, Any] = {
             "label": label,
             "classHint": current_class_hint,
+            "ingredientHint": ingredient_hint,
             "note": note,
             "notCoveredKeycare": not_covered_keycare,
             "execCompOnly": exec_comp_only,
-        })
+        }
+        if item.get("cdaCore") is not None:
+            entry["cdaCore"] = item["cdaCore"]
+        if item.get("cdaExec") is not None:
+            entry["cdaExec"] = item["cdaExec"]
+        medicines.append(entry)
 
     return {"conditionId": condition_id, "medicines": medicines}
 

@@ -1,0 +1,1332 @@
+{
+  "hospitals": {
+    "GAUTENG|netcare alberton hospital": {
+      "lat": -26.2678,
+      "lng": 28.1222,
+      "source": "town",
+      "label": "Netcare Alberton Hospital",
+      "town": "Alberton",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life the glynnwood hospital": {
+      "lat": -26.1885,
+      "lng": 28.3206,
+      "source": "town",
+      "label": "Life The Glynnwood Hospital",
+      "town": "Benoni",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life dalview hospital": {
+      "lat": -26.2365,
+      "lng": 28.3696,
+      "source": "town",
+      "label": "Life Dalview Hospital",
+      "town": "Brakpan",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|mediclinic midstream": {
+      "lat": -25.921,
+      "lng": 28.199,
+      "source": "facility",
+      "label": "Mediclinic Midstream",
+      "town": "Centurion",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare unitas hospital": {
+      "lat": -25.859,
+      "lng": 28.189,
+      "source": "facility",
+      "label": "Netcare Unitas Hospital",
+      "town": "Centurion",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life bedford gardens hospital": {
+      "lat": -26.2309,
+      "lng": 28.1696,
+      "source": "town",
+      "label": "Life Bedford Gardens Hospital",
+      "town": "Germiston",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life roseacres hospital": {
+      "lat": -26.2309,
+      "lng": 28.1696,
+      "source": "town",
+      "label": "Life Roseacres Hospital",
+      "town": "Germiston",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life suikerbosrand hospital": {
+      "lat": -26.5056,
+      "lng": 28.361,
+      "source": "town",
+      "label": "Life Suikerbosrand Hospital",
+      "town": "Heidelberg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|clinix selby park hospital": {
+      "lat": -26.2109,
+      "lng": 28.053,
+      "source": "facility",
+      "label": "Clinix Selby Park Hospital",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life brenthurst hospital": {
+      "lat": -26.1938,
+      "lng": 28.0426,
+      "source": "facility",
+      "label": "Life Brenthurst Hospital",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life fourways hospital": {
+      "lat": -25.976,
+      "lng": 28.0107,
+      "source": "facility",
+      "label": "Life Fourways Hospital",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|mediclinic morningside": {
+      "lat": -26.0788,
+      "lng": 28.0565,
+      "source": "facility",
+      "label": "Mediclinic Morningside",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|nelson mandela children s hospital": {
+      "lat": -26.1856,
+      "lng": 28.0397,
+      "source": "facility",
+      "label": "Nelson Mandela Children\u2019s Hospital",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare garden city hospital": {
+      "lat": -26.183,
+      "lng": 28.0055,
+      "source": "facility",
+      "label": "Netcare Garden City Hospital",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare park lane hospital": {
+      "lat": -26.1495,
+      "lng": 28.0412,
+      "source": "facility",
+      "label": "Netcare Park Lane Hospital",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|wits donald gordon medical centre": {
+      "lat": -26.1864,
+      "lng": 28.0378,
+      "source": "facility",
+      "label": "Wits Donald Gordon Medical Centre",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|arwyp medical centre": {
+      "lat": -26.108,
+      "lng": 28.228,
+      "source": "facility",
+      "label": "Arwyp Medical Centre",
+      "town": "Kempton Park",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare pinehaven": {
+      "lat": -26.088,
+      "lng": 27.768,
+      "source": "facility",
+      "label": "Netcare Pinehaven",
+      "town": "Krugersdorp",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|lenmed ahmed kathrada private hospital": {
+      "lat": -26.3328,
+      "lng": 27.8544,
+      "source": "town",
+      "label": "Lenmed Ahmed Kathrada Private Hospital",
+      "town": "Lenasia",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|lenmed daxina private hospital": {
+      "lat": -26.3328,
+      "lng": 27.8544,
+      "source": "town",
+      "label": "Lenmed Daxina Private Hospital",
+      "town": "Lenasia",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|mediclinic legae": {
+      "lat": -25.4981,
+      "lng": 28.0997,
+      "source": "town",
+      "label": "Mediclinic Legae",
+      "town": "Mabopane",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life carstenhof hospital": {
+      "lat": -25.9992,
+      "lng": 28.1262,
+      "source": "town",
+      "label": "Life Carstenhof Hospital",
+      "town": "Midrand",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare waterfall city hospital": {
+      "lat": -25.912,
+      "lng": 28.128,
+      "source": "facility",
+      "label": "Netcare Waterfall City Hospital",
+      "town": "Midrand",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life eugene marais hospital": {
+      "lat": -25.7479,
+      "lng": 28.2293,
+      "source": "town",
+      "label": "Life Eugene Marais Hospital",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life faerie glen hospital": {
+      "lat": -25.792,
+      "lng": 28.308,
+      "source": "facility",
+      "label": "Life Faerie Glen Hospital",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life groenkloof hospital": {
+      "lat": -25.778,
+      "lng": 28.218,
+      "source": "facility",
+      "label": "Life Groenkloof Hospital",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life wilgers hospital": {
+      "lat": -25.752,
+      "lng": 28.318,
+      "source": "facility",
+      "label": "Life Wilgers Hospital",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|louis pasteur hospital": {
+      "lat": -25.7479,
+      "lng": 28.2293,
+      "source": "town",
+      "label": "Louis Pasteur Hospital",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|mediclinic medforum": {
+      "lat": -25.735,
+      "lng": 28.188,
+      "source": "facility",
+      "label": "Mediclinic Medforum",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|mediclinic muelmed": {
+      "lat": -25.741,
+      "lng": 28.242,
+      "source": "facility",
+      "label": "Mediclinic Muelmed",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare femina hospital": {
+      "lat": -25.738,
+      "lng": 28.195,
+      "source": "facility",
+      "label": "Netcare Femina Hospital",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare jakaranda hospital": {
+      "lat": -25.728,
+      "lng": 28.228,
+      "source": "facility",
+      "label": "Netcare Jakaranda Hospital*",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|optimed eye and laser clinic": {
+      "lat": -25.7479,
+      "lng": 28.2293,
+      "source": "town",
+      "label": "Optimed Eye and Laser Clinic",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|zuid afrikaans hospital": {
+      "lat": -25.7479,
+      "lng": 28.2293,
+      "source": "town",
+      "label": "Zuid Afrikaans Hospital",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare olivedale hospital": {
+      "lat": -26.089,
+      "lng": 28.007,
+      "source": "facility",
+      "label": "Netcare Olivedale Hospital",
+      "town": "Randburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|lenmed health randfontein private hospital": {
+      "lat": -26.1772,
+      "lng": 27.7028,
+      "source": "town",
+      "label": "Lenmed Health Randfontein Private Hospital",
+      "town": "Randfontein",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life robinson private hospital": {
+      "lat": -26.1772,
+      "lng": 27.7028,
+      "source": "town",
+      "label": "Life Robinson Private Hospital",
+      "town": "Randfontein",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life flora hospital": {
+      "lat": -26.148,
+      "lng": 27.872,
+      "source": "facility",
+      "label": "Life Flora Hospital",
+      "town": "Roodepoort",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life wilgeheuwel hospital": {
+      "lat": -26.101,
+      "lng": 27.865,
+      "source": "facility",
+      "label": "Life Wilgeheuwel Hospital",
+      "town": "Roodepoort",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|oxford maternity unit": {
+      "lat": -26.1486,
+      "lng": 28.0397,
+      "source": "town",
+      "label": "Oxford Maternity Unit",
+      "town": "Saxonwold",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|botshilu private hospital": {
+      "lat": -25.4729,
+      "lng": 28.1065,
+      "source": "town",
+      "label": "Botshilu Private Hospital",
+      "town": "Soshanguve",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|clinix tshepo themba private hospital": {
+      "lat": -26.2678,
+      "lng": 27.8585,
+      "source": "town",
+      "label": "Clinix Tshepo-Themba Private Hospital",
+      "town": "Soweto",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|dr s k matseke memorial hospital": {
+      "lat": -26.2678,
+      "lng": 27.8585,
+      "source": "town",
+      "label": "Dr S K Matseke Memorial Hospital",
+      "town": "Soweto",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|life springs parkland hospital": {
+      "lat": -26.2548,
+      "lng": 28.4421,
+      "source": "town",
+      "label": "Life Springs Parkland Hospital",
+      "town": "Springs",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|lenmed health zamokuhle private hospital": {
+      "lat": -25.9969,
+      "lng": 28.2268,
+      "source": "town",
+      "label": "Lenmed Health Zamokuhle Private Hospital",
+      "town": "Tembisa",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|mediclinic emfuleni": {
+      "lat": -26.7118,
+      "lng": 27.8376,
+      "source": "town",
+      "label": "Mediclinic Emfuleni",
+      "town": "Vanderbijlpark",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|clinix naledi nkanyezi private hospital": {
+      "lat": -26.6731,
+      "lng": 27.9265,
+      "source": "town",
+      "label": "Clinix Naledi-Nkanyezi Private Hospital",
+      "town": "Vereeniging",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|mediclinic vereeniging": {
+      "lat": -26.6731,
+      "lng": 27.9265,
+      "source": "town",
+      "label": "Mediclinic Vereeniging",
+      "town": "Vereeniging",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|midvaal private hospital": {
+      "lat": -26.6731,
+      "lng": 27.9265,
+      "source": "town",
+      "label": "Midvaal Private Hospital",
+      "town": "Vereeniging",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|clinix botshelong empilweni private hospital": {
+      "lat": -26.3347,
+      "lng": 28.1816,
+      "source": "town",
+      "label": "Clinix Botshelong-Empilweni Private Hospital",
+      "town": "Vosloorus",
+      "province": "GAUTENG"
+    },
+    "EASTERN CAPE|life beacon bay hospital": {
+      "lat": -33.0153,
+      "lng": 27.9116,
+      "source": "town",
+      "label": "Life Beacon Bay Hospital",
+      "town": "East London",
+      "province": "EASTERN CAPE"
+    },
+    "EASTERN CAPE|life east london private hospital": {
+      "lat": -33.0153,
+      "lng": 27.9116,
+      "source": "town",
+      "label": "Life East London Private Hospital*",
+      "town": "East London",
+      "province": "EASTERN CAPE"
+    },
+    "EASTERN CAPE|life st dominic s private hospital": {
+      "lat": -33.0153,
+      "lng": 27.9116,
+      "source": "town",
+      "label": "Life St Dominic\u2019s Private Hospital",
+      "town": "East London",
+      "province": "EASTERN CAPE"
+    },
+    "EASTERN CAPE|st mary s private hospital": {
+      "lat": -31.5889,
+      "lng": 28.7844,
+      "source": "town",
+      "label": "St Mary\u2019s Private Hospital",
+      "town": "Mthatha",
+      "province": "EASTERN CAPE"
+    },
+    "EASTERN CAPE|life st george s hospital": {
+      "lat": -33.9608,
+      "lng": 25.6022,
+      "source": "town",
+      "label": "Life St George\u2019s Hospital",
+      "town": "Port Elizabeth",
+      "province": "EASTERN CAPE"
+    },
+    "EASTERN CAPE|netcare greenacres hospital": {
+      "lat": -33.97,
+      "lng": 25.548,
+      "source": "facility",
+      "label": "Netcare Greenacres Hospital",
+      "town": "Port Elizabeth",
+      "province": "EASTERN CAPE"
+    },
+    "EASTERN CAPE|life queenstown private hospital": {
+      "lat": -31.8976,
+      "lng": 26.8753,
+      "source": "town",
+      "label": "Life Queenstown Private Hospital",
+      "town": "Queenstown",
+      "province": "EASTERN CAPE"
+    },
+    "EASTERN CAPE|netcare cuyler hospital": {
+      "lat": -33.7576,
+      "lng": 25.3971,
+      "source": "town",
+      "label": "Netcare Cuyler Hospital",
+      "town": "Uitenhage",
+      "province": "EASTERN CAPE"
+    },
+    "FREE STATE|mediclinic hoogland": {
+      "lat": -28.2308,
+      "lng": 28.3071,
+      "source": "town",
+      "label": "Mediclinic Hoogland",
+      "town": "Bethlehem",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|life rosepark hospital": {
+      "lat": -29.0852,
+      "lng": 26.1596,
+      "source": "town",
+      "label": "Life Rosepark Hospital",
+      "town": "Bloemfontein",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|mediclinic bloemfontein": {
+      "lat": -29.0852,
+      "lng": 26.1596,
+      "source": "town",
+      "label": "Mediclinic Bloemfontein",
+      "town": "Bloemfontein",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|netcare pelonomi private hospital": {
+      "lat": -29.0852,
+      "lng": 26.1596,
+      "source": "town",
+      "label": "Netcare Pelonomi Private Hospital",
+      "town": "Bloemfontein",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|netcare universitas private hospital": {
+      "lat": -29.0852,
+      "lng": 26.1596,
+      "source": "town",
+      "label": "Netcare Universitas Private Hospital*",
+      "town": "Bloemfontein",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|pasteur eye hospital": {
+      "lat": -29.0852,
+      "lng": 26.1596,
+      "source": "town",
+      "label": "Pasteur Eye Hospital",
+      "town": "Bloemfontein",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|busamed harrismith hospital": {
+      "lat": -28.2723,
+      "lng": 29.1295,
+      "source": "town",
+      "label": "Busamed Harrismith Hospital",
+      "town": "Harrismith",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|netcare kroon hospital": {
+      "lat": -27.6506,
+      "lng": 27.234,
+      "source": "town",
+      "label": "Netcare Kroon Hospital",
+      "town": "Kroonstad",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|netcare vaalpark hospital": {
+      "lat": -26.8136,
+      "lng": 27.8172,
+      "source": "town",
+      "label": "Netcare Vaalpark Hospital",
+      "town": "Sasolburg",
+      "province": "FREE STATE"
+    },
+    "FREE STATE|mediclinic welkom": {
+      "lat": -27.9774,
+      "lng": 26.7351,
+      "source": "town",
+      "label": "Mediclinic Welkom",
+      "town": "Welkom",
+      "province": "FREE STATE"
+    },
+    "KWAZULU-NATAL|netcare kingsway hospital": {
+      "lat": -30.0527,
+      "lng": 30.8837,
+      "source": "town",
+      "label": "Netcare Kingsway Hospital",
+      "town": "Amanzimtoti",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|netcare alberlito hospital": {
+      "lat": -29.5391,
+      "lng": 31.213,
+      "source": "town",
+      "label": "Netcare Alberlito Hospital",
+      "town": "Ballito",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|life chatsmed garden hospital": {
+      "lat": -29.9181,
+      "lng": 30.8734,
+      "source": "town",
+      "label": "Life Chatsmed Garden Hospital",
+      "town": "Chatsworth",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|jmh ascot park hospital": {
+      "lat": -29.8587,
+      "lng": 31.0218,
+      "source": "town",
+      "label": "JMH Ascot Park Hospital",
+      "town": "Durban",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|jmh city hospital": {
+      "lat": -29.8587,
+      "lng": 31.0218,
+      "source": "town",
+      "label": "JMH City Hospital",
+      "town": "Durban",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|lenmed ethekwini hospital and heart centre": {
+      "lat": -29.8587,
+      "lng": 31.0218,
+      "source": "town",
+      "label": "Lenmed Ethekwini Hospital and Heart Centre",
+      "town": "Durban",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|life entabeni hospital": {
+      "lat": -29.838,
+      "lng": 31.012,
+      "source": "facility",
+      "label": "Life Entabeni Hospital",
+      "town": "Durban",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|life westville hospital": {
+      "lat": -29.838,
+      "lng": 30.928,
+      "source": "facility",
+      "label": "Life Westville Hospital",
+      "town": "Durban",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|netcare st augustine s hospital": {
+      "lat": -29.855,
+      "lng": 31.012,
+      "source": "facility",
+      "label": "Netcare St Augustine\u2019s Hospital",
+      "town": "Durban",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|netcare umhlanga hospital": {
+      "lat": -29.7263,
+      "lng": 31.0879,
+      "source": "facility",
+      "label": "Netcare Umhlanga Hospital",
+      "town": "Durban",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|life empangeni private hospital": {
+      "lat": -28.7615,
+      "lng": 31.8987,
+      "source": "town",
+      "label": "Life Empangeni Private Hospital",
+      "town": "Empangeni",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|jmh isipingo hospital": {
+      "lat": -30.0012,
+      "lng": 30.9433,
+      "source": "town",
+      "label": "JMH Isipingo Hospital",
+      "town": "Isipingo",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|netcare kokstad private hospital": {
+      "lat": -30.5474,
+      "lng": 29.4241,
+      "source": "town",
+      "label": "Netcare Kokstad Private Hospital",
+      "town": "Kokstad",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|lenmed la verna hospital": {
+      "lat": -28.5615,
+      "lng": 29.7795,
+      "source": "town",
+      "label": "Lenmed La Verna Hospital",
+      "town": "Ladysmith",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|mediclinic newcastle": {
+      "lat": -27.7574,
+      "lng": 29.9321,
+      "source": "town",
+      "label": "Mediclinic Newcastle",
+      "town": "Newcastle",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|life mount edgecombe hospital": {
+      "lat": -29.6924,
+      "lng": 31.0052,
+      "source": "town",
+      "label": "Life Mount Edgecombe Hospital",
+      "town": "Phoenix",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|life hilton private hospital": {
+      "lat": -29.6006,
+      "lng": 30.3794,
+      "source": "town",
+      "label": "Life Hilton Private Hospital",
+      "town": "Pietermaritzburg",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|mediclinic pietermaritzburg": {
+      "lat": -29.6006,
+      "lng": 30.3794,
+      "source": "town",
+      "label": "Mediclinic Pietermaritzburg",
+      "town": "Pietermaritzburg",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|midlands medical centre": {
+      "lat": -29.6006,
+      "lng": 30.3794,
+      "source": "town",
+      "label": "Midlands Medical Centre",
+      "town": "Pietermaritzburg",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|busamed hillcrest private hospital": {
+      "lat": -29.778,
+      "lng": 30.758,
+      "source": "facility",
+      "label": "Busamed Hillcrest Private Hospital",
+      "town": "Pinetown",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|life crompton hospital": {
+      "lat": -29.8136,
+      "lng": 30.8615,
+      "source": "town",
+      "label": "Life Crompton Hospital",
+      "town": "Pinetown",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|hibiscus hospital": {
+      "lat": -30.7414,
+      "lng": 30.4551,
+      "source": "town",
+      "label": "Hibiscus Hospital",
+      "town": "Port Shepstone",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|melomed richards bay private hospital": {
+      "lat": -28.783,
+      "lng": 32.0377,
+      "source": "town",
+      "label": "Melomed Richards Bay Private Hospital",
+      "town": "Richards Bay",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|netcare the bay hospital": {
+      "lat": -28.783,
+      "lng": 32.0377,
+      "source": "town",
+      "label": "Netcare The Bay Hospital",
+      "town": "Richards Bay",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|lenmed shifa private hospital": {
+      "lat": -29.8428,
+      "lng": 30.9983,
+      "source": "town",
+      "label": "Lenmed Shifa Private Hospital",
+      "town": "Sydenham",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|mediclinic victoria": {
+      "lat": -29.5736,
+      "lng": 31.1064,
+      "source": "town",
+      "label": "Mediclinic Victoria",
+      "town": "Tongaat",
+      "province": "KWAZULU-NATAL"
+    },
+    "LIMPOPO|mediclinic limpopo": {
+      "lat": -23.9045,
+      "lng": 29.4689,
+      "source": "town",
+      "label": "Mediclinic Limpopo",
+      "town": "Polokwane",
+      "province": "LIMPOPO"
+    },
+    "LIMPOPO|netcare pholoso hospital": {
+      "lat": -23.9045,
+      "lng": 29.4689,
+      "source": "town",
+      "label": "Netcare Pholoso Hospital",
+      "town": "Polokwane",
+      "province": "LIMPOPO"
+    },
+    "LIMPOPO|mediclinic lephalale": {
+      "lat": -23.6783,
+      "lng": 27.7486,
+      "source": "town",
+      "label": "Mediclinic Lephalale",
+      "town": "Lephalale",
+      "province": "LIMPOPO"
+    },
+    "LIMPOPO|mediclinic thabazimbi": {
+      "lat": -24.5917,
+      "lng": 27.4115,
+      "source": "town",
+      "label": "Mediclinic Thabazimbi",
+      "town": "Thabazimbi",
+      "province": "LIMPOPO"
+    },
+    "LIMPOPO|mediclinic tzaneen": {
+      "lat": -23.8335,
+      "lng": 30.1635,
+      "source": "town",
+      "label": "Mediclinic Tzaneen",
+      "town": "Tzaneen",
+      "province": "LIMPOPO"
+    },
+    "MPUMALANGA|rh phodiclinic": {
+      "lat": -25.7881,
+      "lng": 31.0539,
+      "source": "town",
+      "label": "RH Phodiclinic",
+      "town": "Barberton",
+      "province": "MPUMALANGA"
+    },
+    "MPUMALANGA|life cosmos hospital": {
+      "lat": -25.8728,
+      "lng": 29.2332,
+      "source": "town",
+      "label": "Life Cosmos Hospital",
+      "town": "Emalahleni",
+      "province": "MPUMALANGA"
+    },
+    "MPUMALANGA|mediclinic ermelo": {
+      "lat": -26.5333,
+      "lng": 29.9833,
+      "source": "town",
+      "label": "Mediclinic Ermelo",
+      "town": "Ermelo",
+      "province": "MPUMALANGA"
+    },
+    "MPUMALANGA|mediclinic nelspruit": {
+      "lat": -25.4753,
+      "lng": 30.9694,
+      "source": "town",
+      "label": "Mediclinic Nelspruit",
+      "town": "Mbombela",
+      "province": "MPUMALANGA"
+    },
+    "MPUMALANGA|life midmed hospital": {
+      "lat": -25.7751,
+      "lng": 29.4648,
+      "source": "town",
+      "label": "Life Midmed Hospital",
+      "town": "Middelburg",
+      "province": "MPUMALANGA"
+    },
+    "MPUMALANGA|rh piet retief private hospital": {
+      "lat": -27.0167,
+      "lng": 30.8167,
+      "source": "town",
+      "label": "RH Piet Retief Private Hospital",
+      "town": "Piet Retief",
+      "province": "MPUMALANGA"
+    },
+    "MPUMALANGA|mediclinic highveld": {
+      "lat": -26.4833,
+      "lng": 29.2,
+      "source": "town",
+      "label": "Mediclinic Highveld",
+      "town": "Trichardt",
+      "province": "MPUMALANGA"
+    },
+    "NORTH WEST|mediclinic brits": {
+      "lat": -25.6344,
+      "lng": 27.7802,
+      "source": "town",
+      "label": "Mediclinic Brits",
+      "town": "Brits",
+      "province": "NORTH WEST"
+    },
+    "NORTH WEST|the fountain private hospital": {
+      "lat": -26.3603,
+      "lng": 27.3967,
+      "source": "town",
+      "label": "The Fountain Private Hospital",
+      "town": "Carletonville",
+      "province": "NORTH WEST"
+    },
+    "NORTH WEST|life anncron hospital": {
+      "lat": -26.8525,
+      "lng": 26.663,
+      "source": "town",
+      "label": "Life Anncron Hospital",
+      "town": "Klerksdorp",
+      "province": "NORTH WEST"
+    },
+    "NORTH WEST|clinix victoria private hospital": {
+      "lat": -25.8652,
+      "lng": 25.6442,
+      "source": "town",
+      "label": "Clinix Victoria Private Hospital*",
+      "town": "Mahikeng",
+      "province": "NORTH WEST"
+    },
+    "NORTH WEST|mediclinic potchefstroom": {
+      "lat": -26.7136,
+      "lng": 27.097,
+      "source": "town",
+      "label": "Mediclinic Potchefstroom",
+      "town": "Potchefstroom",
+      "province": "NORTH WEST"
+    },
+    "NORTH WEST|life peglerae hospital": {
+      "lat": -25.6672,
+      "lng": 27.2423,
+      "source": "town",
+      "label": "Life Peglerae Hospital",
+      "town": "Rustenburg",
+      "province": "NORTH WEST"
+    },
+    "NORTH WEST|netcare ferncrest hospital": {
+      "lat": -25.6672,
+      "lng": 27.2423,
+      "source": "town",
+      "label": "Netcare Ferncrest Hospital",
+      "town": "Rustenburg",
+      "province": "NORTH WEST"
+    },
+    "NORTH WEST|vryburg private hospital": {
+      "lat": -26.957,
+      "lng": 24.7284,
+      "source": "town",
+      "label": "Vryburg Private Hospital",
+      "town": "Vryburg",
+      "province": "NORTH WEST"
+    },
+    "NORTHERN CAPE|lenmed health kathu private hospital": {
+      "lat": -27.6937,
+      "lng": 23.0493,
+      "source": "town",
+      "label": "Lenmed Health Kathu Private Hospital",
+      "town": "Kathu",
+      "province": "NORTHERN CAPE"
+    },
+    "NORTHERN CAPE|finsch mine hospital": {
+      "lat": -28.7282,
+      "lng": 24.7499,
+      "source": "town",
+      "label": "Finsch Mine Hospital*",
+      "town": "Kimberley",
+      "province": "NORTHERN CAPE"
+    },
+    "NORTHERN CAPE|lenmed royal hospital and heart centre": {
+      "lat": -28.7282,
+      "lng": 24.7499,
+      "source": "town",
+      "label": "Lenmed Royal Hospital and Heart Centre",
+      "town": "Kimberley",
+      "province": "NORTHERN CAPE"
+    },
+    "NORTHERN CAPE|mediclinic kimberley and gariep": {
+      "lat": -28.7282,
+      "lng": 24.7499,
+      "source": "town",
+      "label": "Mediclinic Kimberley and Gariep",
+      "town": "Kimberley",
+      "province": "NORTHERN CAPE"
+    },
+    "NORTHERN CAPE|mediclinic upington": {
+      "lat": -28.4478,
+      "lng": 21.2561,
+      "source": "town",
+      "label": "Mediclinic Upington",
+      "town": "Upington",
+      "province": "NORTHERN CAPE"
+    },
+    "WESTERN CAPE|cape eye hospital": {
+      "lat": -33.9,
+      "lng": 18.6292,
+      "source": "town",
+      "label": "Cape Eye Hospital",
+      "town": "Bellville",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic louis leipoldt": {
+      "lat": -33.9,
+      "lng": 18.6292,
+      "source": "town",
+      "label": "Mediclinic Louis Leipoldt",
+      "town": "Bellville",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|melomed bellville": {
+      "lat": -33.9,
+      "lng": 18.6292,
+      "source": "town",
+      "label": "Melomed Bellville",
+      "town": "Bellville",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|netcare blaauwberg": {
+      "lat": -33.8167,
+      "lng": 18.4833,
+      "source": "town",
+      "label": "Netcare Blaauwberg",
+      "town": "Blouberg",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|life vincent pallotti hospital": {
+      "lat": -33.938,
+      "lng": 18.468,
+      "source": "facility",
+      "label": "Life Vincent Pallotti Hospital",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic cape gate": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Mediclinic Cape Gate",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic cape town": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Mediclinic Cape Town",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic constantiaberg": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Mediclinic Constantiaberg",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic panorama": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Mediclinic Panorama",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|netcare uct medical centre": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Netcare UCT Medical Centre*",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|rondebosch heart centre": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Rondebosch Heart Centre",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|rondebosch medical centre": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Rondebosch Medical Centre",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|life kingsbury hospital": {
+      "lat": -33.982,
+      "lng": 18.468,
+      "source": "facility",
+      "label": "Life Kingsbury Hospital",
+      "town": "Claremont",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|life peninsula eye hospital": {
+      "lat": -33.9806,
+      "lng": 18.4653,
+      "source": "town",
+      "label": "Life Peninsula Eye Hospital",
+      "town": "Claremont",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|melomed gatesville": {
+      "lat": -33.95,
+      "lng": 18.5167,
+      "source": "town",
+      "label": "Melomed Gatesville",
+      "town": "Gatesville",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic george": {
+      "lat": -33.9648,
+      "lng": 22.4614,
+      "source": "town",
+      "label": "Mediclinic George",
+      "town": "George",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic hermanus": {
+      "lat": -34.4187,
+      "lng": 19.2345,
+      "source": "town",
+      "label": "Mediclinic Hermanus",
+      "town": "Hermanus",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|netcare kuilsriver hospital": {
+      "lat": -34.0333,
+      "lng": 18.8,
+      "source": "town",
+      "label": "Netcare Kuilsriver Hospital",
+      "town": "Kuils River",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic milnerton": {
+      "lat": -33.8806,
+      "lng": 18.4903,
+      "source": "town",
+      "label": "Mediclinic Milnerton",
+      "town": "Milnerton",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|melomed mitchells plain": {
+      "lat": -34.0381,
+      "lng": 18.6061,
+      "source": "town",
+      "label": "Melomed Mitchells Plain",
+      "town": "Mitchells Plain",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|life bay view private hospital": {
+      "lat": -34.183,
+      "lng": 22.146,
+      "source": "town",
+      "label": "Life Bay View Private Hospital",
+      "town": "Mossel Bay",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic klein karoo": {
+      "lat": -33.5892,
+      "lng": 22.2075,
+      "source": "town",
+      "label": "Mediclinic Klein Karoo",
+      "town": "Oudtshoorn",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic paarl": {
+      "lat": -33.7342,
+      "lng": 18.9612,
+      "source": "town",
+      "label": "Mediclinic Paarl",
+      "town": "Paarl",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic vergelegen": {
+      "lat": -34.0781,
+      "lng": 18.8436,
+      "source": "town",
+      "label": "Mediclinic Vergelegen",
+      "town": "Somerset West",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic stellenbosch": {
+      "lat": -33.9321,
+      "lng": 18.8602,
+      "source": "town",
+      "label": "Mediclinic Stellenbosch",
+      "town": "Stellenbosch",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic winelands orthopaedic hospital": {
+      "lat": -33.9321,
+      "lng": 18.8602,
+      "source": "town",
+      "label": "Mediclinic Winelands Orthopaedic Hospital",
+      "town": "Stellenbosch",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|melomed tokai hospital": {
+      "lat": -34.0667,
+      "lng": 18.4333,
+      "source": "town",
+      "label": "Melomed Tokai Hospital",
+      "town": "Tokai",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|life west coast private hospital": {
+      "lat": -32.9767,
+      "lng": 17.8756,
+      "source": "town",
+      "label": "Life West Coast Private Hospital",
+      "town": "West Coast",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|mediclinic worcester": {
+      "lat": -33.6464,
+      "lng": 19.4483,
+      "source": "town",
+      "label": "Mediclinic Worcester",
+      "town": "Worcester",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|wilies hospital": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Wilies Hospital*",
+      "town": "LESOTHO",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|maseru private hospital": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Maseru Private Hospital",
+      "town": "LESOTHO",
+      "province": "WESTERN CAPE"
+    },
+    "GAUTENG|netcare linkwood clinic": {
+      "lat": -26.1453,
+      "lng": 28.071,
+      "source": "facility",
+      "label": "Netcare Linkwood Clinic",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare milpark": {
+      "lat": -26.1786,
+      "lng": 28.0265,
+      "source": "facility",
+      "label": "Netcare Milpark",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare park lane clinic": {
+      "lat": -26.1495,
+      "lng": 28.0412,
+      "source": "facility",
+      "label": "Netcare Park Lane Clinic",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare sunninghill hospital": {
+      "lat": -26.0334,
+      "lng": 28.0593,
+      "source": "facility",
+      "label": "Netcare Sunninghill Hospital",
+      "town": "Johannesburg",
+      "province": "GAUTENG"
+    },
+    "GAUTENG|netcare femina clinic": {
+      "lat": -25.738,
+      "lng": 28.195,
+      "source": "facility",
+      "label": "Netcare Femina Clinic",
+      "town": "Pretoria",
+      "province": "GAUTENG"
+    },
+    "KWAZULU-NATAL|netcare st augustine s": {
+      "lat": -29.855,
+      "lng": 31.012,
+      "source": "facility",
+      "label": "Netcare St Augustine\u2019s",
+      "town": "Durban",
+      "province": "KWAZULU-NATAL"
+    },
+    "KWAZULU-NATAL|busamed gateway private hospital": {
+      "lat": -29.723,
+      "lng": 31.075,
+      "source": "facility",
+      "label": "Busamed Gateway Private Hospital",
+      "town": "Umhlanga",
+      "province": "KWAZULU-NATAL"
+    },
+    "WESTERN CAPE|melomed tokai": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Melomed Tokai",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|netcare christiaan barnard memorial hospital": {
+      "lat": -33.916,
+      "lng": 18.421,
+      "source": "facility",
+      "label": "Netcare Christiaan Barnard Memorial Hospital",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|exception hospitals": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "Exception hospitals",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|in some cases we ll cover certain defined procedures at specific hospitals that fall outside of your plan s hospital network": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "In some cases, we\u2019ll cover certain defined procedures at specific hospitals that fall outside of your plan\u2019s hospital network.",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "WESTERN CAPE|when you re admitted to one of these exception hospitals for one of the approved procedures the usual upfront payments for using": {
+      "lat": -33.9249,
+      "lng": 18.4241,
+      "source": "town",
+      "label": "When you\u2019re admitted to one of these exception hospitals for one of the approved procedures, the usual upfront payments for using",
+      "town": "Cape Town",
+      "province": "WESTERN CAPE"
+    },
+    "FREE STATE|at specialist hospital": {
+      "lat": -29.0852,
+      "lng": 26.1596,
+      "source": "town",
+      "label": "At Specialist Hospital",
+      "town": "Bloemfontein",
+      "province": "FREE STATE"
+    },
+    "KWAZULU-NATAL|hilldrop hospital": {
+      "lat": -27.7574,
+      "lng": 29.9321,
+      "source": "town",
+      "label": "Hilldrop Hospital",
+      "town": "Newcastle",
+      "province": "KWAZULU-NATAL"
+    },
+    "NORTHERN CAPE|hospital ekhaya": {
+      "lat": -28.7282,
+      "lng": 24.7499,
+      "source": "town",
+      "label": "Hospital@Ekhaya",
+      "town": "Kimberley",
+      "province": "NORTHERN CAPE"
+    },
+    "NORTHERN CAPE|kopano private hospital": {
+      "lat": -27.4524,
+      "lng": 23.4325,
+      "source": "town",
+      "label": "Kopano Private Hospital",
+      "town": "Kuruman",
+      "province": "NORTHERN CAPE"
+    }
+  }
+}

@@ -6,121 +6,284 @@ import {
   normalizeLabel,
 } from '../lib/medicineClassifier';
 import {
-  getActiveMedicationsByCondition,
-} from '../lib/prescriptionStore';
+  filterIngredientGroups,
+  groupMedicinesByIngredient,
+} from '../lib/medicineIngredients';
+import {
+  formatCdaBadge,
+  formatCdaLine,
+  getCdaAmount,
+  getMedicinePaymentRule,
+} from '../lib/medicinePaymentRules';
+import {
+  medicationCdaCopayLiteracy,
+  medicationSideEffectMotivationLiteracy,
+} from '../lib/literacyContent';
+import { getActiveMedicationsByCondition } from '../lib/prescriptionStore';
 import {
   getPlanFromProfile,
   getProfileConditions,
   hasProfileConditions,
 } from '../lib/profileContext';
+import {
+  AUTHI_GRADIENT,
+  AUTHI_GRADIENT_SOFT,
+  AUTHI_PURPLE,
+  PATIENT_CLASSES,
+} from '../lib/authiTheme';
+import BrandEyebrow from './BrandEyebrow';
+import { CAMPAIGN_LITERACY_ENABLED, CAMPAIGN_MEMBER_MODE } from '../lib/campaignConfig';
+import { isModuleUnlocked } from '../lib/campaignStore';
+import { buildMedicineIntroSpeech, MEDICINE_COVER_COPY } from '../lib/literacyModuleCopy';
+import LiteracyModuleQuickCheck from './LiteracyModuleQuickCheck';
 import FeaturePageHeader from './FeaturePageHeader';
+import GoodToKnowCard from './GoodToKnowCard';
+import GradientChip from './GradientChip';
+import { GradientSegmentButton, GradientSegmentTrack } from './GradientSegment';
+import { PatientButtonPrimary } from './PatientButton';
 
 const ALL_CONDITIONS_CHIP = '__all__';
-
-const selectCls =
-  'w-full rounded-xl border border-white/10 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-200 outline-none focus:border-emerald-400/40 focus:ring-1 focus:ring-emerald-400/20 appearance-none';
 
 /* ── Coverage badge chip ─────────────────────────────────── */
 const CoverageBadge = ({ med, planId }) => {
   const { covered, label, colour } = coverageBadge(med, planId);
   const colours = {
-    emerald: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
-    amber: 'border-amber-400/40 bg-amber-400/10 text-amber-300',
-    orange: 'border-orange-400/40 bg-orange-400/10 text-orange-300',
+    emerald: 'border-emerald-300 bg-emerald-50 text-emerald-800',
+    amber: 'border-amber-300 bg-amber-50 text-amber-800',
+    orange: 'border-orange-300 bg-orange-50 text-orange-800',
   };
   return (
     <span className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${colours[colour]}`}>
-      {covered ? (
-        <svg className="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 0 1 0 1.414l-8 8a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 1.414-1.414L8 12.586l7.293-7.293a1 1 0 0 1 1.414 0z" clipRule="evenodd" />
-        </svg>
-      ) : (
-        <svg className="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-8a1 1 0 0 0-1 1v3a1 1 0 0 0 2 0V6a1 1 0 0 0-1-1z" clipRule="evenodd" />
-        </svg>
-      )}
-      {label}
+      {covered ? '✓' : '!'} {label}
     </span>
   );
 };
 
-/* ── Medicine card (inside a class drill-down) ─────────────── */
-const MedicineCard = ({ med, planId, prescribed }) => {
+/* ── Brand medicine card (inside ingredient detail) ──────── */
+const BrandMedicineCard = ({ med, planId, prescribed, conditionId }) => {
   const { covered } = coverageBadge(med, planId);
+  const paymentRule = getMedicinePaymentRule(conditionId, med.label);
+
   return (
-    <div className={`flex flex-col gap-2 rounded-2xl border px-4 py-3.5 transition ${
-      prescribed
-        ? 'border-amber-400/40 bg-amber-400/5 shadow-amber-950/20 shadow-md'
-        : !covered
-        ? 'border-orange-400/15 bg-orange-400/3'
-        : 'border-white/8 bg-white/4'
-    }`}>
+    <div
+      className={`flex flex-col gap-2 rounded-2xl border px-4 py-3.5 transition ${
+        prescribed
+          ? 'border-amber-300 bg-amber-50'
+          : !covered
+          ? 'border-orange-200 bg-orange-50/50'
+          : 'border-[#EAECF0] bg-white'
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
-        <p className={`text-sm font-medium leading-snug ${covered ? 'text-slate-100' : 'text-slate-400'}`}>
+        <p className={`text-sm font-medium leading-snug ${covered ? 'text-[#111827]' : 'text-[#6B7280]'}`}>
           {normalizeLabel(med.label)}
         </p>
-        {!covered && (
-          <svg className="mt-0.5 h-4 w-4 shrink-0 text-orange-400/70" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-          </svg>
-        )}
       </div>
       <div className="flex flex-wrap gap-1.5">
+        <span className="rounded-full border border-[#BAE6FD] bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
+          Brand name
+        </span>
         <CoverageBadge med={med} planId={planId} />
         {prescribed && (
-          <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-            ● Active prescription
+          <span className="rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+            Active prescription
           </span>
         )}
       </div>
-      {med.note && (
-        <p className="text-[11px] leading-4 text-slate-500">{med.note}</p>
+      {med.note && <p className="text-[11px] leading-4 text-[#9CA3AF]">{med.note}</p>}
+      {paymentRule?.kind === 'listed_brand' && (
+        <p className="text-[11px] leading-4 text-emerald-700">
+          Listed brand — generally paid in full at a DSP pharmacy (does not use the R{paymentRule.cap} cap).
+        </p>
       )}
     </div>
   );
 };
 
-/* ── Active prescriptions — shown at top of Medication page ─ */
-const ActivePrescriptionsPanel = ({ rows, plan }) => {
-  if (!rows.length) return null;
+/* ── Ingredient row on the main list ─────────────────────── */
+const IngredientCard = ({ group, planId, hasPrescribed, onClick }) => {
+  const brandCount = group.brands.length;
+  const uncovered = brandCount - group.coveredCount;
+  const cdaBadge = formatCdaBadge(planId, group);
 
   return (
-    <section className="rounded-[2rem] border border-amber-400/30 bg-gradient-to-br from-amber-400/10 via-amber-950/20 to-slate-950/80 p-6 shadow-xl shadow-amber-950/15">
+    <button
+      type="button"
+      onClick={onClick}
+      className="group w-full rounded-2xl border border-[#EAECF0] bg-white px-5 py-4 text-left shadow-sm transition hover:border-[#9F62ED]/40 hover:shadow-md"
+    >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
-            Active prescriptions
-          </p>
-          <p className="mt-1 text-sm text-slate-300">
-            Medicines you are currently using — across all your profile conditions.
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-base font-semibold text-[#111827] group-hover:text-[#9F62ED]">
+              {group.label}
+            </p>
+            {hasPrescribed && (
+              <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-800">
+                Active Rx
+              </span>
+            )}
+            {cdaBadge && planId && (
+              <span
+                className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-white"
+                style={{ background: AUTHI_GRADIENT }}
+              >
+                {cdaBadge}
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-[#6B7280]">{group.className}</p>
+          <p className="mt-0.5 text-xs text-[#9CA3AF]">
+            {brandCount} listed brand{brandCount !== 1 ? 's' : ''}
+            {uncovered > 0 && planId && (
+              <span className="ml-1.5 text-amber-700">· {uncovered} not on your plan</span>
+            )}
           </p>
         </div>
-        <span className="shrink-0 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 py-1 text-[10px] font-bold text-amber-300">
-          {rows.reduce((n, r) => n + r.medications.length, 0)} active
-        </span>
+        <svg
+          className="mt-1 h-5 w-5 shrink-0 text-[#9CA3AF] transition group-hover:text-[#9F62ED]"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+        </svg>
+      </div>
+    </button>
+  );
+};
+
+/* ── Ingredient detail (brands + class + CDA) ────────────── */
+const IngredientDetail = ({ group, planId, planLabel, conditionId, isPrescribed, showSideEffectLiteracy }) => {
+  const cdaLine = formatCdaLine(planId, group, planLabel);
+  const cdaAmount = getCdaAmount(planId, group);
+  const cdaLiteracy = medicationCdaCopayLiteracy({ cdaAmount, planLabel });
+  const uncovered = group.brands.length - group.coveredCount;
+
+  return (
+    <div className="space-y-4">
+      <div className={PATIENT_CLASSES.card}>
+        <BrandEyebrow>Active ingredient</BrandEyebrow>
+        <h2 className="mt-2 text-2xl font-semibold text-[#111827]">{group.label}</h2>
+        <p className="mt-2 text-sm text-[#6B7280]">
+          Medicine class: <span className="text-[#111827]">{group.className}</span>
+        </p>
+        {planId && (
+          <p className="mt-2 text-xs text-[#9CA3AF]">
+            {group.coveredCount} of {group.brands.length} listed brands covered on {planLabel}
+            {uncovered > 0 && (
+              <span className="text-amber-700"> · {uncovered} restricted on your plan</span>
+            )}
+          </p>
+        )}
+        {cdaLiteracy && (
+          <div className="mt-4">
+            <GoodToKnowCard tone="authi" {...cdaLiteracy} />
+          </div>
+        )}
+        {cdaLine && !cdaLiteracy && (
+          <div className={`mt-4 ${PATIENT_CLASSES.innerCard}`}>
+            <BrandEyebrow className="!text-[10px]">What Discovery pays (CDA)</BrandEyebrow>
+            <p className="mt-2 text-sm leading-6 text-[#374151]">{cdaLine}</p>
+          </div>
+        )}
+        {showSideEffectLiteracy && (
+          <div className="mt-4">
+            <GoodToKnowCard
+              tone="amber"
+              {...medicationSideEffectMotivationLiteracy({
+                medicineName: group.brands.find((b) => isPrescribed(b))?.label ?? group.label,
+              })}
+            />
+          </div>
+        )}
       </div>
 
+      <div>
+        <BrandEyebrow className="mb-3">Listed brand names</BrandEyebrow>
+        <div className="space-y-2">
+          {group.brands.map((med) => (
+            <BrandMedicineCard
+              key={med.label}
+              med={med}
+              planId={planId}
+              prescribed={isPrescribed(med)}
+              conditionId={conditionId}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── Class browse card (secondary view) ──────────────────── */
+const ClassCard = ({ cls, planId, hasPrescribed, onClick }) => {
+  const pct = cls.medicines.length ? Math.round((cls.coveredCount / cls.medicines.length) * 100) : 0;
+  const uncoveredCount = cls.medicines.length - cls.coveredCount;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full rounded-2xl border border-[#EAECF0] bg-white px-5 py-4 text-left shadow-sm transition hover:border-[#9F62ED]/40"
+    >
+      <p className="text-sm font-semibold text-[#111827]">{cls.name}</p>
+      <p className="mt-0.5 text-xs text-[#6B7280]">
+        {cls.medicines.length} medicines
+        {uncoveredCount > 0 && planId && ` · ${uncoveredCount} not on your plan`}
+      </p>
+      {planId && (
+        <p className="mt-1 text-xs" style={{ color: AUTHI_PURPLE }}>{pct}% covered on your plan</p>
+      )}
+    </button>
+  );
+};
+
+/* ── Active prescriptions panel ──────────────────────────── */
+const ActivePrescriptionsPanel = ({ rows, plan, conditionId }) => {
+  if (!rows.length) return null;
+
+  const showAsthmaSideEffectNote =
+    conditionId === 'asthma' &&
+    rows.some((r) =>
+      r.medications.some((m) => /lumont|montelukast|singulair|montascend/i.test(m))
+    );
+
+  return (
+    <section
+      className={`${PATIENT_CLASSES.card} border-amber-200`}
+      style={{ background: AUTHI_GRADIENT_SOFT }}
+    >
+      <BrandEyebrow>Active prescriptions</BrandEyebrow>
+      <p className="mt-2 text-sm text-[#374151]">Medicines you are currently using (demo simulation).</p>
+      {showAsthmaSideEffectNote && (
+        <div className="mt-4">
+          <GoodToKnowCard
+            tone="amber"
+            {...medicationSideEffectMotivationLiteracy({
+              medicineName: 'Lumont (montelukast)',
+            })}
+          />
+        </div>
+      )}
       <div className="mt-5 space-y-4">
         {rows.map(({ conditionId, medications }) => {
           const label = CDL_CONDITIONS.find((c) => c.id === conditionId)?.label ?? conditionId;
           return (
             <div key={conditionId}>
-              <p className="mb-2 text-xs font-semibold text-slate-400">{label}</p>
+              <BrandEyebrow className="mb-2 !text-[10px]">{label}</BrandEyebrow>
               <div className="grid gap-2 sm:grid-cols-2">
                 {medications.map((med) => (
                   <div
                     key={med}
-                    className="flex flex-col gap-2 rounded-2xl border border-amber-400/40 bg-amber-400/8 px-4 py-3.5"
+                    className="rounded-2xl border border-amber-200 bg-white px-4 py-3.5 shadow-sm"
                   >
-                    <p className="text-sm font-semibold leading-snug text-amber-100">
-                      {normalizeLabel(med)}
-                    </p>
-                    <span className="w-fit rounded-full border border-amber-400/45 bg-amber-400/15 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-                      ● Active prescription
-                    </span>
+                    <p className="text-sm font-semibold text-[#111827]">{normalizeLabel(med)}</p>
                     {plan && (
-                      <p className="text-[10px] text-slate-500">
-                        Covered on your {plan.label} plan — browse classes below for alternatives.
+                      <p className="mt-1 text-[10px] text-[#9CA3AF]">
+                        On your {plan.label} plan — find the ingredient below for alternatives.
                       </p>
                     )}
                   </div>
@@ -134,84 +297,68 @@ const ActivePrescriptionsPanel = ({ rows, plan }) => {
   );
 };
 
-/* ── Class summary card (the top-level list) ────────────────── */
-const ClassCard = ({ cls, planId, hasPrescribed, onClick }) => {
-  const pct = cls.medicines.length ? Math.round((cls.coveredCount / cls.medicines.length) * 100) : 0;
-  const uncoveredCount = cls.medicines.length - cls.coveredCount;
-  const barColour = pct === 100 ? 'bg-emerald-400' : pct === 0 ? 'bg-slate-700' : 'bg-amber-400';
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group w-full rounded-2xl border border-white/8 bg-white/4 px-5 py-4 text-left transition hover:border-emerald-400/25 hover:bg-white/6"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold text-slate-100 group-hover:text-white transition">
-              {cls.name}
-            </p>
-            {hasPrescribed && (
-              <span className="rounded-full border border-amber-400/40 bg-amber-400/12 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-300">
-                Active Rx
-              </span>
-            )}
-          </div>
-          <p className="mt-0.5 text-xs text-slate-500">
-            {cls.medicines.length} medicine{cls.medicines.length !== 1 ? 's' : ''}
-            {uncoveredCount > 0 && planId && (
-              <span className="ml-1.5 text-amber-400/80">
-                · {uncoveredCount} not covered by your plan
-              </span>
-            )}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          <span className={`text-base font-bold ${pct === 100 ? 'text-emerald-400' : pct === 0 ? 'text-slate-600' : 'text-amber-400'}`}>
-            {planId ? `${pct}%` : '–'}
-          </span>
-          <span className="text-[10px] text-slate-600">covered</span>
-        </div>
-      </div>
-      {planId && (
-        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-          <div
-            className={`h-full rounded-full transition-all ${barColour}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      )}
-      <div className="mt-3 flex items-center justify-between">
-        <span className="text-[10px] text-slate-600">
-          {cls.coveredCount} covered · {uncoveredCount} restricted
-        </span>
-        <svg className="h-4 w-4 text-slate-600 group-hover:text-emerald-400 transition" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-        </svg>
-      </div>
-    </button>
-  );
-};
-
 /* ── Main component ────────────────────────────────────────── */
-export default function MedicationView({ profile, onNavigate, onEditProfile, prescriptions }) {
+export default function MedicationView({
+  profile,
+  focusConditionId,
+  onNavigate,
+  onEditProfile,
+  prescriptions,
+  campaignRefreshKey = 0,
+  browseAllConditions = false,
+  onBrowseAllConditionsChange,
+}) {
+  const hidePrescriptionUi = CAMPAIGN_MEMBER_MODE;
   const plan = getPlanFromProfile(profile);
   const planId = plan?.id ?? null;
   const profileConditionIds = getProfileConditions(profile);
   const usesProfileConditions = hasProfileConditions(profile);
 
-  const [browseAllConditions, setBrowseAllConditions] = useState(false);
-  const [selectedCondition, setSelectedCondition] = useState(
-    profileConditionIds[0] ?? CDL_CONDITIONS[0].id
+  const initialCondition =
+    focusConditionId && profileConditionIds.includes(focusConditionId)
+      ? focusConditionId
+      : profileConditionIds[0] ?? CDL_CONDITIONS[0].id;
+
+  const [browseAllConditionsInternal, setBrowseAllConditionsInternal] = useState(false);
+  const browseAll =
+    onBrowseAllConditionsChange != null ? browseAllConditions : browseAllConditionsInternal;
+
+  const [selectedCondition, setSelectedCondition] = useState(initialCondition);
+  const [narrowCondition, setNarrowCondition] = useState(
+    focusConditionId && profileConditionIds.includes(focusConditionId)
+      ? focusConditionId
+      : ALL_CONDITIONS_CHIP
   );
-  const [narrowCondition, setNarrowCondition] = useState(ALL_CONDITIONS_CHIP);
+
+  useEffect(() => {
+    if (
+      focusConditionId &&
+      profileConditionIds.includes(focusConditionId) &&
+      !browseAll
+    ) {
+      setSelectedCondition(focusConditionId);
+      setNarrowCondition(focusConditionId);
+    }
+  }, [focusConditionId, profileConditionIds, browseAll]);
   const [searchText, setSearchText] = useState('');
   const [medicineData, setMedicineData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [browseMode, setBrowseMode] = useState('ingredient');
+  const [selectedIngredientId, setSelectedIngredientId] = useState(null);
   const [selectedClassId, setSelectedClassId] = useState(null);
+  const [moduleUnlocked, setModuleUnlocked] = useState(
+    () => !CAMPAIGN_LITERACY_ENABLED || isModuleUnlocked('medication')
+  );
 
-  const showFullConditionDropdown = !usesProfileConditions || browseAllConditions;
+  useEffect(() => {
+    if (!CAMPAIGN_LITERACY_ENABLED) {
+      setModuleUnlocked(true);
+      return;
+    }
+    setModuleUnlocked(isModuleUnlocked('medication'));
+  }, [campaignRefreshKey]);
+
+  const showFullConditionDropdown = !usesProfileConditions || browseAll;
 
   const effectiveCondition =
     usesProfileConditions && !showFullConditionDropdown && narrowCondition !== ALL_CONDITIONS_CHIP
@@ -221,65 +368,85 @@ export default function MedicationView({ profile, onNavigate, onEditProfile, pre
   const conditionLabel =
     CDL_CONDITIONS.find((c) => c.id === effectiveCondition)?.label ?? effectiveCondition;
 
-  /* Fetch medicine data from PDF-backed API */
   useEffect(() => {
     let cancelled = false;
     setMedicineData(null);
     setLoading(true);
+    setSelectedIngredientId(null);
     setSelectedClassId(null);
 
     fetch(`/api/medications?condition_id=${encodeURIComponent(effectiveCondition)}`)
       .then((r) => r.json())
       .then((data) => { if (!cancelled) setMedicineData(data); })
-      .catch(() => { if (!cancelled) setMedicineData({ conditionId: effectiveCondition, medicines: [] }); })
+      .catch(() => {
+        if (!cancelled) setMedicineData({ conditionId: effectiveCondition, medicines: [] });
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
   }, [effectiveCondition]);
 
-  /* Group into classes using the frontend classifier */
+  const ingredientGroups = useMemo(
+    () => groupMedicinesByIngredient(medicineData?.medicines ?? [], planId),
+    [medicineData, planId]
+  );
+
+  const filteredIngredients = useMemo(
+    () => filterIngredientGroups(ingredientGroups, searchText),
+    [ingredientGroups, searchText]
+  );
+
   const classGroups = useMemo(
     () => groupMedicinesByClass(medicineData?.medicines ?? [], planId),
     [medicineData, planId]
   );
 
-  /* Search filters across all classes */
-  const filteredGroups = useMemo(() => {
+  const filteredClasses = useMemo(() => {
     if (!searchText.trim()) return classGroups;
     const q = searchText.toLowerCase();
     return classGroups
       .map((cls) => ({
         ...cls,
-        medicines: cls.medicines.filter((m) =>
-          normalizeLabel(m.label).toLowerCase().includes(q) ||
-          cls.name.toLowerCase().includes(q)
+        medicines: cls.medicines.filter(
+          (m) =>
+            normalizeLabel(m.label).toLowerCase().includes(q) ||
+            cls.name.toLowerCase().includes(q)
         ),
       }))
       .filter((cls) => cls.medicines.length > 0);
   }, [classGroups, searchText]);
 
-  /* Drill-down data */
-  const selectedClass = filteredGroups.find((c) => c.id === selectedClassId) ?? null;
+  const selectedIngredient =
+    filteredIngredients.find((g) => g.id === selectedIngredientId) ??
+    ingredientGroups.find((g) => g.id === selectedIngredientId) ??
+    null;
 
-  /* Prescribed medicines for the current condition */
+  const selectedClass = filteredClasses.find((c) => c.id === selectedClassId) ?? null;
+
   const prescribedMeds = prescriptions?.[effectiveCondition]?.medications ?? [];
-  const hasPrescribed = (cls) =>
-    cls.medicines.some((m) =>
-      prescribedMeds.some(
-        (p) => normalizeLabel(p).toLowerCase() === normalizeLabel(m.label).toLowerCase()
-      )
-    );
 
-  const isPrescribed = (med) =>
-    prescribedMeds.some(
-      (p) => normalizeLabel(p).toLowerCase() === normalizeLabel(med.label).toLowerCase()
-    );
+  const isPrescribed = hidePrescriptionUi
+    ? () => false
+    : (med) =>
+        prescribedMeds.some(
+          (p) => normalizeLabel(p).toLowerCase() === normalizeLabel(med.label).toLowerCase()
+        );
+
+  const ingredientHasPrescribed = hidePrescriptionUi
+    ? () => false
+    : (group) => group.brands.some((m) => isPrescribed(m));
+
+  const classHasPrescribed = hidePrescriptionUi
+    ? () => false
+    : (cls) => cls.medicines.some((m) => isPrescribed(m));
+
+  const medicineIntroSpeech = useMemo(() => buildMedicineIntroSpeech(), []);
 
   const planContext = plan ? `${plan.label} plan · Chronic Illness Benefit` : null;
 
   const activeMedicationRows = useMemo(() => {
     const ids =
-      usesProfileConditions && !browseAllConditions
+      usesProfileConditions && !browseAll
         ? profileConditionIds
         : [effectiveCondition];
     return getActiveMedicationsByCondition(prescriptions, ids);
@@ -287,43 +454,29 @@ export default function MedicationView({ profile, onNavigate, onEditProfile, pre
     prescriptions,
     profileConditionIds,
     usesProfileConditions,
-    browseAllConditions,
+    browseAll,
     effectiveCondition,
   ]);
 
-  /* ── No profile conditions ─────────────────────────────── */
-  if (!usesProfileConditions && !browseAllConditions) {
+  if (!usesProfileConditions && !browseAll) {
     return (
       <div className="space-y-8">
         <FeaturePageHeader
-          eyebrow="Medication"
-          eyebrowClassName="text-emerald-300"
-          title="Chronic illness medicines"
-          description="Add chronic conditions in your profile to see formulary medicines broken down by class with plan coverage."
+          title="Is my medicine covered?"
+          description="Add chronic conditions to your profile to see which medicines are covered on your plan."
           onBack={onNavigate ? () => onNavigate('dashboard') : undefined}
           profileContext={planContext}
+          sourceNote="Medicine lists from the 2026 Chronic Illness Benefit formulary."
         />
-        <div className="rounded-[2rem] border border-dashed border-white/15 bg-white/3 p-10 text-center">
-          <p className="text-sm text-slate-300">No chronic conditions on your profile yet.</p>
-          <p className="mt-2 text-xs text-slate-500">
-            Add conditions like Hypertension or Asthma so Authi can show you which medicines are covered.
+        <div className={PATIENT_CLASSES.emptyState}>
+          <p className="text-sm font-medium text-[#111827]">
+            Add a condition to your profile to see which medicines are covered.
           </p>
           {onEditProfile && (
-            <button
-              type="button"
-              onClick={onEditProfile}
-              className="mt-6 rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-            >
-              Edit profile
-            </button>
+            <PatientButtonPrimary type="button" onClick={onEditProfile} className="mt-6">
+              Add conditions to my profile
+            </PatientButtonPrimary>
           )}
-          <button
-            type="button"
-            onClick={() => setBrowseAllConditions(true)}
-            className="mt-4 block w-full text-xs text-slate-500 underline-offset-2 hover:text-emerald-300 hover:underline"
-          >
-            Browse all conditions
-          </button>
         </div>
       </div>
     );
@@ -332,256 +485,244 @@ export default function MedicationView({ profile, onNavigate, onEditProfile, pre
   return (
     <div className="space-y-6">
       <FeaturePageHeader
-        eyebrow="Medication"
-        eyebrowClassName="text-emerald-300"
-        title="Medicine classes"
+        title="Is my medicine covered?"
         description={
           plan
-            ? `Formulary medicines for your conditions, showing what's covered on your ${plan.label} plan.`
-            : 'Browse formulary medicines from the 2026 Chronic Illness Benefit list by pharmacological class.'
+            ? `Browse by active ingredient for ${conditionLabel} — see listed brands and what your ${plan.label} plan pays.`
+            : 'Browse medicines by active ingredient and see listed brand names.'
         }
         onBack={onNavigate ? () => onNavigate('dashboard') : undefined}
         profileContext={planContext}
+        sourceNote="Medicine lists from the 2026 Chronic Illness Benefit formulary."
       />
 
-      {/* ── Active prescriptions (always at top) ──────── */}
-      <ActivePrescriptionsPanel rows={activeMedicationRows} plan={plan} />
+      {CAMPAIGN_LITERACY_ENABLED && !moduleUnlocked && (
+        <LiteracyModuleQuickCheck
+          moduleId="medication"
+          profile={profile}
+          conditionId={effectiveCondition}
+          refreshKey={campaignRefreshKey}
+          onUnlock={() => setModuleUnlocked(true)}
+          introSpeech={medicineIntroSpeech}
+          moduleIntroQuizPitch={MEDICINE_COVER_COPY.moduleIntroQuizPitch}
+          startQuizLabel={MEDICINE_COVER_COPY.startQuizLabel}
+          skipLabel={MEDICINE_COVER_COPY.skipLabel}
+          eyebrowLabel={`${conditionLabel} · medicine cover`}
+        />
+      )}
 
-      {/* ── Filter panel ────────────────────────────────── */}
-      <div className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-xl backdrop-blur">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-          Medicine selection
-        </p>
+      {moduleUnlocked && (
+        <>
+      {!hidePrescriptionUi && (
+        <ActivePrescriptionsPanel
+          rows={activeMedicationRows}
+          plan={plan}
+          conditionId={effectiveCondition}
+        />
+      )}
+
+      <div className={PATIENT_CLASSES.card}>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <p className={PATIENT_CLASSES.eyebrow}>
+            {conditionLabel}
+          </p>
+          <GradientSegmentTrack>
+            <GradientSegmentButton
+              active={browseMode === 'ingredient'}
+              onClick={() => {
+                setBrowseMode('ingredient');
+                setSelectedClassId(null);
+              }}
+            >
+              By ingredient
+            </GradientSegmentButton>
+            <GradientSegmentButton
+              active={browseMode === 'class'}
+              onClick={() => {
+                setBrowseMode('class');
+                setSelectedIngredientId(null);
+              }}
+            >
+              By class
+            </GradientSegmentButton>
+          </GradientSegmentTrack>
+        </div>
 
         {showFullConditionDropdown && (
           <div className="mb-4">
-            <label className="mb-1.5 block text-xs font-medium text-slate-400">Condition</label>
-            <div className="relative">
-              <select
-                value={selectedCondition}
-                onChange={(e) => {
-                  setSelectedCondition(e.target.value);
-                  setSearchText('');
-                  setSelectedClassId(null);
-                }}
-                className={selectCls}
-              >
-                {CDL_CONDITIONS.map((c) => (
-                  <option key={c.id} value={c.id}>{c.label}</option>
-                ))}
-              </select>
-              <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-              </svg>
-            </div>
+            <label className={PATIENT_CLASSES.label}>Condition</label>
+            <select
+              value={selectedCondition}
+              onChange={(e) => {
+                setSelectedCondition(e.target.value);
+                setSearchText('');
+                setSelectedIngredientId(null);
+                setSelectedClassId(null);
+              }}
+              className={PATIENT_CLASSES.select}
+            >
+              {CDL_CONDITIONS.map((c) => (
+                <option key={c.id} value={c.id}>{c.label}</option>
+              ))}
+            </select>
           </div>
         )}
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-400">
-            Search by medicine name or class
+          <label className={PATIENT_CLASSES.label}>
+            Search ingredient or brand name
           </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={searchText}
-              onChange={(e) => {
-                setSearchText(e.target.value);
-                setSelectedClassId(null);
-              }}
-              placeholder="e.g. Salbutamol, ICS, Enalapril…"
-              className="w-full rounded-xl border border-white/10 bg-slate-900/80 py-2.5 pl-9 pr-4 text-sm text-slate-200 outline-none placeholder:text-slate-600 focus:border-emerald-400/40 focus:ring-1 focus:ring-emerald-400/20"
-            />
-            <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-          </div>
+          <input
+            type="text"
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setSelectedIngredientId(null);
+              setSelectedClassId(null);
+            }}
+            placeholder="e.g. Montelukast, Ventimax, Salbutamol…"
+            className={PATIENT_CLASSES.input}
+          />
         </div>
 
-        {/* Condition narrow chips */}
         {usesProfileConditions && !showFullConditionDropdown && profileConditionIds.length > 1 && (
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-600">Condition:</span>
-            <button
-              type="button"
-              onClick={() => setNarrowCondition(ALL_CONDITIONS_CHIP)}
-              className={`rounded-full border px-3 py-0.5 text-xs font-medium transition ${
-                narrowCondition === ALL_CONDITIONS_CHIP
-                  ? 'border-emerald-400/50 bg-emerald-400/15 text-emerald-300'
-                  : 'border-white/10 bg-white/5 text-slate-400 hover:text-emerald-300'
-              }`}
-            >
-              All mine
-            </button>
+          <div className="mt-4 flex flex-wrap gap-2">
             {profileConditionIds.map((id) => {
               const label = CDL_CONDITIONS.find((c) => c.id === id)?.label ?? id;
               return (
-                <button
+                <GradientChip
                   key={id}
-                  type="button"
+                  selected={narrowCondition === id}
                   onClick={() => setNarrowCondition(id)}
-                  className={`rounded-full border px-3 py-0.5 text-xs font-medium transition ${
-                    narrowCondition === id
-                      ? 'border-emerald-400/50 bg-emerald-400/15 text-emerald-300'
-                      : 'border-white/10 bg-white/5 text-slate-400 hover:text-emerald-300'
-                  }`}
                 >
                   {label}
-                </button>
+                </GradientChip>
               );
             })}
           </div>
         )}
-
-        {usesProfileConditions && browseAllConditions && (
-          <button
-            type="button"
-            onClick={() => { setBrowseAllConditions(false); setNarrowCondition(ALL_CONDITIONS_CHIP); }}
-            className="mt-3 text-xs text-emerald-400/80 hover:text-emerald-300"
-          >
-            ← Back to my profile conditions
-          </button>
-        )}
-        {usesProfileConditions && !browseAllConditions && (
-          <button
-            type="button"
-            onClick={() => setBrowseAllConditions(true)}
-            className="mt-3 text-xs text-slate-500 hover:text-emerald-300"
-          >
-            Browse all conditions
-          </button>
-        )}
       </div>
 
-      {/* ── Plan coverage context banner ──────────────── */}
       {plan && medicineData && (
-        <div className="flex items-center gap-3 rounded-2xl border border-emerald-400/15 bg-emerald-400/5 px-4 py-3">
-          <span className="flex h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
-          <div>
-            <p className="text-xs font-semibold text-emerald-300">{plan.label} plan — {conditionLabel}</p>
-            <p className="text-[11px] text-slate-500">
-              Coverage shown based on the 2026 Chronic Illness Benefit formulary.
-              Items marked amber are not covered on your plan.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* ── Loading ────────────────────────────────────── */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center rounded-[2rem] border border-white/8 bg-white/3 py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/30 border-t-emerald-400" />
-          <p className="mt-3 text-sm text-slate-500">Loading formulary from PDF…</p>
-        </div>
-      )}
-
-      {/* ── No medicines from PDF ─────────────────────── */}
-      {!loading && medicineData && filteredGroups.length === 0 && (
-        <div className="rounded-[2rem] border border-dashed border-white/15 bg-white/3 p-8 text-center">
-          <p className="text-sm text-slate-400">
-            {searchText ? `No medicines match "${searchText}".` : 'No formulary medicines found for this condition.'}
+        <div
+          className="flex items-center gap-3 rounded-2xl border border-[#E9D5FF] px-4 py-3"
+          style={{ background: AUTHI_GRADIENT_SOFT }}
+        >
+          <span
+            className="h-2 w-2 shrink-0 rounded-full"
+            style={{ background: AUTHI_GRADIENT }}
+          />
+          <p className="text-xs text-[#374151]">
+            <span className="font-semibold" style={{ color: AUTHI_PURPLE }}>{plan.label}</span> — coverage and CDA
+            amounts from the 2026 Chronic Illness Benefit formulary.
           </p>
         </div>
       )}
 
-      {/* ── Drill-down breadcrumb ─────────────────────── */}
-      {selectedClass && (
-        <button
-          type="button"
-          onClick={() => setSelectedClassId(null)}
-          className="flex items-center gap-1.5 text-xs text-emerald-400/80 hover:text-emerald-300 transition"
-        >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-          </svg>
-          Back to classes
-          <span className="text-slate-600">/</span>
-          <span className="text-slate-300">{selectedClass.name}</span>
-        </button>
+      {loading && (
+        <div className={PATIENT_CLASSES.emptyState}>
+          <div
+            className="h-8 w-8 animate-spin rounded-full border-2 border-[#9F62ED]/30"
+            style={{ borderTopColor: AUTHI_PURPLE }}
+          />
+          <p className="mt-3 text-sm text-[#6B7280]">Loading formulary…</p>
+        </div>
       )}
 
-      {/* ── Class list view ───────────────────────────── */}
-      {!loading && !selectedClass && filteredGroups.length > 0 && (
+      {/* Ingredient browse */}
+      {!loading && browseMode === 'ingredient' && (
         <>
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Filter by medicine class
-            </p>
-            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
-              {filteredGroups.reduce((n, c) => n + c.medicines.length, 0)} medicines
-            </span>
-          </div>
-
-          {/* Summary row */}
-          <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/5 px-5 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-slate-100">All Classes</p>
-                <p className="text-xs text-slate-500">
-                  {filteredGroups.reduce((n, c) => n + c.medicines.length, 0)} total medicines
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-emerald-400">
-                  {filteredGroups.reduce((n, c) => n + c.medicines.length, 0) > 0
-                    ? Math.round(
-                        (filteredGroups.reduce((n, c) => n + c.coveredCount, 0) /
-                          filteredGroups.reduce((n, c) => n + c.medicines.length, 0)) *
-                          100
-                      )
-                    : 0}%
-                </p>
-                <p className="text-[10px] text-slate-600">
-                  {plan ? `covered on ${plan.label}` : 'coverage'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {filteredGroups.map((cls) => (
-              <ClassCard
-                key={cls.id}
-                cls={cls}
+          {selectedIngredient ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setSelectedIngredientId(null)}
+                className="flex items-center gap-1.5 text-xs text-[#9F62ED] hover:text-[#7c4fd4]"
+              >
+                ← Back to ingredients
+              </button>
+              <IngredientDetail
+                group={selectedIngredient}
                 planId={planId}
-                hasPrescribed={hasPrescribed(cls)}
-                onClick={() => setSelectedClassId(cls.id)}
+                planLabel={plan?.label ?? 'your plan'}
+                conditionId={effectiveCondition}
+                isPrescribed={isPrescribed}
+                showSideEffectLiteracy={
+                  !hidePrescriptionUi &&
+                  effectiveCondition === 'asthma' &&
+                  selectedIngredient.label.toLowerCase().includes('montelukast') &&
+                  ingredientHasPrescribed(selectedIngredient)
+                }
               />
-            ))}
-          </div>
+            </>
+          ) : (
+            <>
+              <BrandEyebrow className="mb-3">Active ingredients — tap to see brands</BrandEyebrow>
+              {filteredIngredients.length === 0 ? (
+                <p className="text-sm text-[#6B7280]">No ingredients match your search.</p>
+              ) : (
+                <div className="space-y-2">
+                  {filteredIngredients.map((group) => (
+                    <IngredientCard
+                      key={group.id}
+                      group={group}
+                      planId={planId}
+                      hasPrescribed={ingredientHasPrescribed(group)}
+                      onClick={() => setSelectedIngredientId(group.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
 
-      {/* ── Medicine drill-down ───────────────────────── */}
-      {!loading && selectedClass && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-500">
-              <span className="font-semibold text-slate-300">{selectedClass.medicines.length} medicines</span>
-              {' '}in <span className="text-emerald-300">{selectedClass.name}</span>
-            </p>
-            {plan && (
-              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-                selectedClass.coveredCount === selectedClass.medicines.length
-                  ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
-                  : selectedClass.coveredCount === 0
-                  ? 'border-slate-700 bg-slate-900 text-slate-500'
-                  : 'border-amber-400/30 bg-amber-400/10 text-amber-300'
-              }`}>
-                {selectedClass.coveredCount}/{selectedClass.medicines.length} covered on {plan.label}
-              </span>
-            )}
-          </div>
-
-          {selectedClass.medicines.map((med) => (
-            <MedicineCard
-              key={med.label}
-              med={med}
-              planId={planId}
-              prescribed={isPrescribed(med)}
-            />
-          ))}
-        </div>
+      {/* Class browse (secondary) */}
+      {!loading && browseMode === 'class' && (
+        <>
+          {selectedClass ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setSelectedClassId(null)}
+                className="text-xs text-[#9F62ED] hover:text-[#7c4fd4]"
+              >
+                ← Back to classes
+              </button>
+              <p className="text-sm text-[#6B7280]">{selectedClass.name}</p>
+              <div className="space-y-2">
+                {groupMedicinesByIngredient(selectedClass.medicines, planId).map((group) => (
+                  <IngredientCard
+                    key={group.id}
+                    group={group}
+                    planId={planId}
+                    hasPrescribed={ingredientHasPrescribed(group)}
+                    onClick={() => {
+                      setBrowseMode('ingredient');
+                      setSelectedIngredientId(group.id);
+                      setSelectedClassId(null);
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="space-y-2">
+              {filteredClasses.map((cls) => (
+                <ClassCard
+                  key={cls.id}
+                  cls={cls}
+                  planId={planId}
+                  hasPrescribed={classHasPrescribed(cls)}
+                  onClick={() => setSelectedClassId(cls.id)}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+        </>
       )}
     </div>
   );

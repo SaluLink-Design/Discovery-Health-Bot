@@ -1,10 +1,77 @@
+const noMsa = { mainMember: 0, adult: 0, child: 0 };
+
+const createContributionSubTheme = ({
+  id,
+  label,
+  monthlyContribution,
+  monthlySavings = noMsa,
+  annualSavings = null,
+  monthlyTotal,
+  hasMedicalSavingsAccount = true,
+  notes = [],
+}) => ({
+  id,
+  label,
+  rates: {
+    monthly: {
+      contribution: monthlyContribution,
+      savings: monthlySavings,
+      total: monthlyTotal ?? {
+        mainMember: monthlyContribution.mainMember + monthlySavings.mainMember,
+        adult: monthlyContribution.adult + monthlySavings.adult,
+        child: monthlyContribution.child + monthlySavings.child,
+      },
+    },
+    annual: annualSavings
+      ? {
+          savings: annualSavings,
+        }
+      : undefined,
+  },
+  hasMedicalSavingsAccount,
+  notes,
+});
+
 export const DISCOVERY_PLANS = [
   {
     id: 'core',
     label: 'Core',
     tagline: 'Essential cover with KeyCare network access',
-    hospitalNetworkCodes: ['KH', 'KC', 'KS', 'KR'],
-    hospitalNetworkNames: ['KeyCare Hospital Network'],
+    hospitalNetworkCodes: ['KH', 'KC', 'KS', 'KR', 'D', 'C'],
+    hospitalNetworkNames: ['KeyCare Hospital Network', 'Delta Hospital Network', 'Coastal Network'],
+    defaultSubThemeId: 'classic_core',
+    subThemes: [
+      createContributionSubTheme({
+        id: 'classic_core',
+        label: 'Classic Core',
+        monthlyContribution: { mainMember: 3905, adult: 3083, child: 1562 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'classic_delta_core',
+        label: 'Classic Delta Core',
+        monthlyContribution: { mainMember: 3126, adult: 2465, child: 1250 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'essential_core',
+        label: 'Essential Core',
+        monthlyContribution: { mainMember: 3356, adult: 2517, child: 1347 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'essential_delta_core',
+        label: 'Essential Delta Core',
+        monthlyContribution: { mainMember: 2681, adult: 2018, child: 1076 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'coastal_core',
+        label: 'Coastal Core',
+        monthlyContribution: { mainMember: 3250, adult: 2438, child: 1291 },
+        hasMedicalSavingsAccount: false,
+      }),
+    ],
     notes: [
       'Planned admissions must use a KeyCare network hospital.',
       'Chronic medicine covered via the Prescribed Minimum Benefits (PMB) drug list.',
@@ -17,6 +84,44 @@ export const DISCOVERY_PLANS = [
     tagline: 'Balanced cover with Smart and Delta networks',
     hospitalNetworkCodes: ['S', 'D'],
     hospitalNetworkNames: ['Smart Hospital Network', 'Delta Hospital Network'],
+    defaultSubThemeId: 'classic_saver',
+    subThemes: [
+      createContributionSubTheme({
+        id: 'classic_saver',
+        label: 'Classic Saver',
+        monthlyContribution: { mainMember: 3880, adult: 3060, child: 1555 },
+        monthlySavings: { mainMember: 970, adult: 765, child: 388 },
+        annualSavings: { mainMember: 11448, adult: 9030, child: 4578 },
+      }),
+      createContributionSubTheme({
+        id: 'classic_delta_saver',
+        label: 'Classic Delta Saver',
+        monthlyContribution: { mainMember: 3100, adult: 2450, child: 1245 },
+        monthlySavings: { mainMember: 775, adult: 612, child: 311 },
+        annualSavings: { mainMember: 9147, adult: 7224, child: 3672 },
+      }),
+      createContributionSubTheme({
+        id: 'essential_saver',
+        label: 'Essential Saver',
+        monthlyContribution: { mainMember: 3498, adult: 2623, child: 1401 },
+        monthlySavings: { mainMember: 388, adult: 291, child: 155 },
+        annualSavings: { mainMember: 4581, adult: 3435, child: 1830 },
+      }),
+      createContributionSubTheme({
+        id: 'essential_delta_saver',
+        label: 'Essential Delta Saver',
+        monthlyContribution: { mainMember: 2790, adult: 2106, child: 1119 },
+        monthlySavings: { mainMember: 309, adult: 233, child: 124 },
+        annualSavings: { mainMember: 3648, adult: 2751, child: 1464 },
+      }),
+      createContributionSubTheme({
+        id: 'coastal_saver',
+        label: 'Coastal Saver',
+        monthlyContribution: { mainMember: 3484, adult: 2620, child: 1401 },
+        monthlySavings: { mainMember: 614, adult: 462, child: 247 },
+        annualSavings: { mainMember: 7233, adult: 5442, child: 2913 },
+      }),
+    ],
     notes: [
       'Planned admissions should use a Smart or Delta network hospital.',
       'Access to a medical savings account (MSA) for day-to-day expenses.',
@@ -29,6 +134,23 @@ export const DISCOVERY_PLANS = [
     tagline: 'Comprehensive day-to-day plus Smart and Delta networks',
     hospitalNetworkCodes: ['S', 'D'],
     hospitalNetworkNames: ['Smart Hospital Network', 'Delta Hospital Network'],
+    defaultSubThemeId: 'classic_priority',
+    subThemes: [
+      createContributionSubTheme({
+        id: 'classic_priority',
+        label: 'Classic Priority',
+        monthlyContribution: { mainMember: 4649, adult: 3667, child: 1859 },
+        monthlySavings: { mainMember: 1549, adult: 1222, child: 619 },
+        annualSavings: { mainMember: 18285, adult: 14424, child: 7308 },
+      }),
+      createContributionSubTheme({
+        id: 'essential_priority',
+        label: 'Essential Priority',
+        monthlyContribution: { mainMember: 4528, adult: 3561, child: 1808 },
+        monthlySavings: { mainMember: 799, adult: 628, child: 319 },
+        annualSavings: { mainMember: 9432, adult: 7413, child: 3765 },
+      }),
+    ],
     notes: [
       'More generous day-to-day cover than Saver.',
       'Planned hospital admissions via Smart or Delta network.',
@@ -44,6 +166,23 @@ export const DISCOVERY_PLANS = [
       'KeyCare Hospital Network',
       'Smart Hospital Network',
       'Delta Hospital Network',
+    ],
+    defaultSubThemeId: 'classic_comprehensive',
+    subThemes: [
+      createContributionSubTheme({
+        id: 'classic_comprehensive',
+        label: 'Classic Comprehensive',
+        monthlyContribution: { mainMember: 7528, adult: 7119, child: 1502 },
+        monthlySavings: { mainMember: 2509, adult: 2373, child: 500 },
+        annualSavings: { mainMember: 29550, adult: 27948, child: 5892 },
+      }),
+      createContributionSubTheme({
+        id: 'classic_smart_comprehensive',
+        label: 'Classic Smart Comprehensive',
+        monthlyContribution: { mainMember: 7290, adult: 6732, child: 1702 },
+        monthlySavings: { mainMember: 1286, adult: 1188, child: 300 },
+        annualSavings: { mainMember: 15147, adult: 13992, child: 3534 },
+      }),
     ],
     notes: [
       'Access to the full Discovery hospital panel with no network restriction for planned admissions.',
@@ -61,10 +200,189 @@ export const DISCOVERY_PLANS = [
       'Smart Hospital Network',
       'Delta Hospital Network',
     ],
+    defaultSubThemeId: 'executive_plan',
+    subThemes: [
+      createContributionSubTheme({
+        id: 'executive_plan',
+        label: 'Executive Plan',
+        monthlyContribution: { mainMember: 9254, adult: 9254, child: 1769 },
+        monthlySavings: { mainMember: 3084, adult: 3084, child: 589 },
+        annualSavings: { mainMember: 36327, adult: 36327, child: 6939 },
+      }),
+    ],
     notes: [
       'No network restrictions — any private hospital in South Africa.',
       'Top-of-range chronic condition management and specialist access.',
       'International emergency cover and full preventive care suite.',
+    ],
+  },
+  {
+    id: 'smart_saver',
+    label: 'Smart Saver',
+    tagline: 'Smart network cover with lower monthly savings allocations',
+    hospitalNetworkCodes: ['S'],
+    hospitalNetworkNames: ['Smart Hospital Network'],
+    defaultSubThemeId: 'classic_smart_saver',
+    subThemes: [
+      createContributionSubTheme({
+        id: 'classic_smart_saver',
+        label: 'Classic Smart Saver',
+        monthlyContribution: { mainMember: 3115, adult: 2641, child: 1302 },
+        monthlySavings: { mainMember: 235, adult: 199, child: 98 },
+        annualSavings: { mainMember: 2820, adult: 2388, child: 1176 },
+      }),
+      createContributionSubTheme({
+        id: 'essential_smart_saver',
+        label: 'Essential Smart Saver',
+        monthlyContribution: { mainMember: 2557, adult: 2185, child: 832 },
+        monthlySavings: { mainMember: 193, adult: 165, child: 63 },
+        annualSavings: { mainMember: 2316, adult: 1980, child: 756 },
+      }),
+    ],
+    notes: [
+      'Smart Saver options use the Smart Hospital Network for planned care.',
+      'Medical savings allocations are lower than Saver plans.',
+    ],
+  },
+  {
+    id: 'smart',
+    label: 'Smart',
+    tagline: 'No-MSA options with Smart and Dynamic Smart networks',
+    hospitalNetworkCodes: ['S', 'DS'],
+    hospitalNetworkNames: ['Smart Hospital Network', 'Dynamic Smart Network'],
+    defaultSubThemeId: 'classic_smart',
+    subThemes: [
+      createContributionSubTheme({
+        id: 'classic_smart',
+        label: 'Classic Smart',
+        monthlyContribution: { mainMember: 3018, adult: 2381, child: 1205 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'essential_smart',
+        label: 'Essential Smart',
+        monthlyContribution: { mainMember: 2161, adult: 2161, child: 2161 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'essential_dynamic_smart',
+        label: 'Essential Dynamic Smart',
+        monthlyContribution: { mainMember: 1797, adult: 1797, child: 1797 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'active_smart',
+        label: 'Active Smart',
+        monthlyContribution: { mainMember: 1350, adult: 1350, child: 1350 },
+        hasMedicalSavingsAccount: false,
+      }),
+    ],
+    notes: [
+      'Smart plans listed here do not include a Medical Savings Account.',
+      'Network access depends on the selected Smart option.',
+    ],
+  },
+  {
+    id: 'keycare',
+    label: 'KeyCare',
+    tagline: 'Income-banded KeyCare options for lower contribution tiers',
+    hospitalNetworkCodes: ['KH', 'KC', 'KS', 'KR'],
+    hospitalNetworkNames: [
+      'KeyCare Hospital Network',
+      'KeyCare Casualty Hospitals',
+      'KeyCare Start Network',
+      'KeyCare Start Regional Network',
+    ],
+    defaultSubThemeId: 'keycare_plus_0_10250',
+    subThemes: [
+      createContributionSubTheme({
+        id: 'keycare_plus_0_10250',
+        label: 'KeyCare Plus (0 - 10,250)',
+        monthlyContribution: { mainMember: 1961, adult: 1961, child: 713 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_plus_10251_16600',
+        label: 'KeyCare Plus (10,251 - 16,600)',
+        monthlyContribution: { mainMember: 2695, adult: 2695, child: 760 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_plus_16601_plus',
+        label: 'KeyCare Plus (16,601+)',
+        monthlyContribution: { mainMember: 3980, adult: 3980, child: 1064 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_core_0_10250',
+        label: 'KeyCare Core (0 - 10,250)',
+        monthlyContribution: { mainMember: 1490, adult: 1490, child: 390 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_core_10251_16600',
+        label: 'KeyCare Core (10,251 - 16,600)',
+        monthlyContribution: { mainMember: 1859, adult: 1859, child: 461 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_core_16601_plus',
+        label: 'KeyCare Core (16,601+)',
+        monthlyContribution: { mainMember: 2845, adult: 2845, child: 645 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_start_0_10950',
+        label: 'KeyCare Start (0 - 10,950)',
+        monthlyContribution: { mainMember: 1436, adult: 1436, child: 875 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_start_10951_16550',
+        label: 'KeyCare Start (10,951 - 16,550)',
+        monthlyContribution: { mainMember: 2107, adult: 2107, child: 947 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_start_16551_25150',
+        label: 'KeyCare Start (16,551 - 25,150)',
+        monthlyContribution: { mainMember: 3306, adult: 3306, child: 992 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_start_25151_plus',
+        label: 'KeyCare Start (25,151+)',
+        monthlyContribution: { mainMember: 3765, adult: 3765, child: 1024 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_start_regional_0_10950',
+        label: 'KeyCare Start Regional (0 - 10,950)',
+        monthlyContribution: { mainMember: 1278, adult: 1278, child: 769 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_start_regional_10951_16550',
+        label: 'KeyCare Start Regional (10,951 - 16,550)',
+        monthlyContribution: { mainMember: 1932, adult: 1932, child: 869 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_start_regional_16551_25150',
+        label: 'KeyCare Start Regional (16,551 - 25,150)',
+        monthlyContribution: { mainMember: 3011, adult: 3011, child: 922 },
+        hasMedicalSavingsAccount: false,
+      }),
+      createContributionSubTheme({
+        id: 'keycare_start_regional_25151_plus',
+        label: 'KeyCare Start Regional (25,151+)',
+        monthlyContribution: { mainMember: 3430, adult: 3430, child: 961 },
+        hasMedicalSavingsAccount: false,
+      }),
+    ],
+    notes: [
+      'KeyCare contributions vary by income band, selected as a sub-theme option.',
+      'KeyCare options listed here do not include a Medical Savings Account.',
     ],
   },
 ];

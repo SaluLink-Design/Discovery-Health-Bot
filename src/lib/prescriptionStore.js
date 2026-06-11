@@ -1,6 +1,6 @@
 import { CDL_CONDITION_DETAILS } from '../data/authiData';
 
-const STORAGE_KEY = 'authi_prescriptions_v3';
+const STORAGE_KEY = 'authi_prescriptions_v4';
 
 /**
  * Prescription store shape:
@@ -85,8 +85,8 @@ export const getUsedCount = (prescriptions, conditionId, code) =>
 const CONDITION_DEMO_SEEDS = {
   asthma: {
     treatments: ['diagnostic:1188 or 1186', 'ongoing:1192'],
-    usedCounts: { '1192': 2 },
-    medications: ['Ventimax CFC free 200 dose 100mcg'],
+    usedCounts: { '1192': 3 },
+    medications: ['Lumont                                              4mg; 5mg; 10mg'],
   },
   hypertension: {
     treatments: ['diagnostic:1232 or 1233'],

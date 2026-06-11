@@ -1,4 +1,24 @@
-import { CDL_CONDITIONS, DISCOVERY_PLANS } from '../data/authiData';
+import { useEffect, useState } from 'react';
+import { CDL_CONDITIONS } from '../data/authiData';
+import {
+  AUTHI_GRADIENT,
+  AUTHI_GRADIENT_SOFT,
+  AUTHI_PURPLE,
+  PATIENT_COLORS,
+  PATIENT_FONT,
+} from '../lib/authiTheme';
+import {
+  ALSO_EXPLORE_ITEMS,
+} from '../lib/memberFeatures';
+import { DEFAULT_PERSONA_NAME } from '../data/demoCharacters';
+import { CAMPAIGN_LITERACY_ENABLED, SCHEME_SOURCE_NOTE } from '../lib/campaignConfig';
+import { getNextCampaignModule } from '../lib/campaignStore';
+import CampaignProgressCard from './CampaignProgressCard';
+import {
+  getPlanFromProfile,
+  getPlanSubThemeFromProfile,
+} from '../lib/profileContext';
+import BrandEyebrow from './BrandEyebrow';
 
 const NETWORK_CODE_LABELS = {
   KH: 'KeyCare Hospital',
@@ -11,194 +31,428 @@ const NETWORK_CODE_LABELS = {
   C: 'Coastal',
 };
 
-const FEATURE_CARDS = [
-  {
-    view: 'hospitals',
-    title: 'Hospital Network',
-    description: 'Pick a province — your plan networks are applied automatically when you search.',
-    accent: 'from-cyan-500/10 to-cyan-400/5',
-    border: 'border-cyan-400/20',
-    badge: 'bg-cyan-400/15 text-cyan-300',
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
-      </svg>
-    ),
-  },
-  {
-    view: 'treatment',
-    title: 'Treatment Plans',
-    description: 'View treatment basket items for your chronic conditions — diagnostic and ongoing care items side by side.',
-    accent: 'from-violet-500/10 to-violet-400/5',
-    border: 'border-violet-400/20',
-    badge: 'bg-violet-400/15 text-violet-300',
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-      </svg>
-    ),
-  },
-  {
-    view: 'medication',
-    title: 'Medication',
-    description: 'Search medicines across the chronic conditions in your profile, tagged by condition.',
-    accent: 'from-emerald-500/10 to-emerald-400/5',
-    border: 'border-emerald-400/20',
-    badge: 'bg-emerald-400/15 text-emerald-300',
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="m21 7.5-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
-      </svg>
-    ),
-  },
-];
+const CONDITIONS_NUDGE_KEY = 'authi_conditions_nudge';
 
-export default function DashboardView({ profile, onNavigate }) {
-  const plan = DISCOVERY_PLANS.find((p) => p.id === profile.plan);
-  const memberName = profile.name || 'Member';
-  const initial = memberName.charAt(0).toUpperCase();
+const ArrowRight = ({ size = 15 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+  </svg>
+);
+
+const MapPin = ({ size = 11 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+  </svg>
+);
+
+const Activity = ({ size = 12 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+  </svg>
+);
+
+const Building2 = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Z" />
+  </svg>
+);
+
+const cardStyle = {
+  background: PATIENT_COLORS.cardBg,
+  border: `1px solid ${PATIENT_COLORS.cardBorder}`,
+  boxShadow: '0 1px 8px rgba(0,0,0,0.04)',
+};
+
+const getConditionLabel = (id) =>
+  CDL_CONDITIONS.find((c) => c.id === id)?.label ?? id;
+
+export default function DashboardView({
+  profile,
+  activeConditionId,
+  onNavigate,
+  onEditProfile,
+  campaignRefreshKey = 0,
+  onRetakeJourney,
+  onRetakeModuleQuiz,
+}) {
+  const [showConditionsNudge, setShowConditionsNudge] = useState(false);
+
+  useEffect(() => {
+    try {
+      setShowConditionsNudge(sessionStorage.getItem(CONDITIONS_NUDGE_KEY) === '1');
+    } catch {
+      setShowConditionsNudge(false);
+    }
+  }, []);
+
+  const dismissConditionsNudge = () => {
+    try {
+      sessionStorage.removeItem(CONDITIONS_NUDGE_KEY);
+    } catch {
+      // ignore
+    }
+    setShowConditionsNudge(false);
+  };
+
+  const plan = getPlanFromProfile(profile);
+  const subTheme = getPlanSubThemeFromProfile(profile);
+  const personaName = profile?.name?.trim() || DEFAULT_PERSONA_NAME;
+  const initial = personaName.charAt(0).toUpperCase();
   const conditionLabels = (profile.conditions ?? []).map(
     (id) => CDL_CONDITIONS.find((c) => c.id === id)?.label ?? id
   );
+  const hasConditions = conditionLabels.length > 0;
+  const planLabel = [plan?.label, subTheme?.label].filter(Boolean).join(' · ');
+  const networkNames = (plan?.hospitalNetworkCodes ?? [])
+    .map((code) => NETWORK_CODE_LABELS[code] ?? code)
+    .join(', ');
+
+  const activeConditionLabel = activeConditionId
+    ? getConditionLabel(activeConditionId)
+    : null;
+
+  const heroTitle = activeConditionLabel
+    ? `${personaName}'s cover for ${activeConditionLabel}`
+    : hasConditions
+      ? `${personaName}'s cover for ${conditionLabels[0]}`
+      : `Learn what ${personaName}'s plan covers`;
+
+  const heroSubtitle = planLabel
+    ? `${planLabel} — follow the literacy journey below, or explore freely.`
+    : `Customise ${personaName}'s profile to start the journey.`;
+
+  const nextCampaignModule = CAMPAIGN_LITERACY_ENABLED
+    ? getNextCampaignModule(profile)
+    : null;
+
+  const handlePrimaryCta = () => {
+    if (!hasConditions) {
+      onEditProfile?.();
+      return;
+    }
+    if (nextCampaignModule) {
+      onNavigate(nextCampaignModule);
+      return;
+    }
+    onNavigate('treatment');
+  };
+
+  const primaryCtaLabel = !hasConditions
+    ? 'Add your chronic conditions'
+    : nextCampaignModule === 'treatment'
+      ? "See what care I'm covered for"
+      : nextCampaignModule === 'medication'
+        ? 'Check medicine cover'
+        : nextCampaignModule === 'hospitals'
+          ? 'Find hospitals on my plan'
+          : "See what care I'm covered for";
+
+  const primaryCtaDetail = !hasConditions
+    ? 'Unlock care and medicine cover for your profile.'
+    : nextCampaignModule
+      ? 'Continue your literacy journey — quick check first, then explore.'
+      : 'Diagnostic tests and ongoing management for conditions on your profile.';
+
+  const locationLabel = [profile.town, profile.province].filter(Boolean).join(', ');
 
   return (
-    <div className="space-y-8">
-
-      {/* Member hero */}
-      <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
-        <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 to-slate-950/80 p-8 shadow-2xl shadow-cyan-950/20 backdrop-blur">
-          <div className="flex items-start gap-5">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-cyan-400/15 text-2xl font-bold text-cyan-300">
-              {initial}
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Member</p>
-              <h1 className="mt-1 text-3xl font-semibold text-white">{memberName}</h1>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-0.5 text-sm font-medium text-cyan-300">
-                  {plan?.label ?? profile.plan} Plan
-                </span>
-                {conditionLabels.length > 0 && (
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-0.5 text-xs text-slate-400">
-                    {conditionLabels.length} chronic condition{conditionLabels.length > 1 ? 's' : ''}
-                  </span>
-                )}
-              </div>
-              {plan?.tagline && (
-                <p className="mt-3 text-sm leading-6 text-slate-400">{plan.tagline}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Plan notes */}
-          {plan?.notes?.length > 0 && (
-            <ul className="mt-6 space-y-2">
-              {plan.notes.map((note, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-slate-300">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400/60" />
-                  {note}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Network badges */}
-        <div className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6 shadow-xl shadow-cyan-950/20">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Hospital networks
-          </p>
-          <div className="mt-4 flex flex-col gap-2">
-            {(plan?.hospitalNetworkCodes ?? []).map((code) => (
-              <div
-                key={code}
-                className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/4 px-3 py-2.5"
-              >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-400/15 text-[10px] font-bold text-cyan-300">
-                  {code}
-                </span>
-                <span className="text-sm text-slate-300">
-                  {NETWORK_CODE_LABELS[code] ?? code}
-                </span>
-              </div>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => onNavigate('hospitals')}
-            className="mt-4 w-full rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-xs font-medium text-cyan-300 transition hover:bg-cyan-400/15"
-          >
-            Browse hospitals
-          </button>
-        </div>
+    <div style={{ fontFamily: PATIENT_FONT }}>
+      <div
+        className="mb-6 rounded-2xl p-8"
+        style={{
+          background: PATIENT_COLORS.heroBg,
+          boxShadow: '0 4px 24px rgba(13,15,28,0.12)',
+        }}
+      >
+        <BrandEyebrow>Your cover</BrandEyebrow>
+        <h1
+          style={{
+            color: '#FFFFFF',
+            fontSize: '28px',
+            fontWeight: 700,
+            marginTop: 8,
+            marginBottom: 8,
+            lineHeight: 1.25,
+          }}
+        >
+          {heroTitle}
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', marginBottom: 24 }}>
+          {heroSubtitle}
+        </p>
+        <button
+          type="button"
+          onClick={handlePrimaryCta}
+          className="inline-flex items-center gap-2 rounded-xl px-5 py-3"
+          style={{
+            background: AUTHI_GRADIENT,
+            color: '#FFFFFF',
+            fontSize: '14px',
+            fontWeight: 600,
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(159,98,237,0.4)',
+          }}
+        >
+          {primaryCtaLabel}
+          <ArrowRight />
+        </button>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', marginTop: 12 }}>
+          {primaryCtaDetail}
+        </p>
       </div>
 
-      {/* Chronic conditions */}
-      {conditionLabels.length > 0 ? (
-        <div className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-            My chronic conditions
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {conditionLabels.map((label, i) => (
-              <span
-                key={i}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200"
-              >
-                {label}
-              </span>
-            ))}
+      {CAMPAIGN_LITERACY_ENABLED && (
+        <CampaignProgressCard
+          profile={profile}
+          onNavigate={onNavigate}
+          refreshKey={campaignRefreshKey}
+          onRetakeJourney={onRetakeJourney}
+          onRetakeModuleQuiz={onRetakeModuleQuiz}
+        />
+      )}
+
+      {showConditionsNudge && !hasConditions && onEditProfile && (
+        <div
+          className="mb-5 flex flex-col gap-3 rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+          style={{ ...cardStyle, borderColor: '#FCD34D' }}
+        >
+          <div>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: PATIENT_COLORS.textPrimary }}>
+              Next step: add your chronic conditions
+            </p>
+            <p style={{ fontSize: '12px', color: PATIENT_COLORS.textSecondary, marginTop: 2 }}>
+              This unlocks care entitlements and medicine cover personalised to you.
+            </p>
           </div>
-        </div>
-      ) : (
-        <div className="rounded-[2rem] border border-dashed border-white/15 bg-white/3 p-6 text-center">
-          <p className="text-sm text-slate-500">No chronic conditions on record.</p>
-          <p className="mt-1 text-xs text-slate-600">
-            Edit your profile to add CDL conditions and see personalised treatment and medication data.
-          </p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={onEditProfile}
+              className="rounded-xl px-4 py-2"
+              style={{
+                background: AUTHI_GRADIENT,
+                color: '#FFFFFF',
+                fontSize: '12px',
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Add conditions
+            </button>
+            <button
+              type="button"
+              onClick={dismissConditionsNudge}
+              className="rounded-xl px-4 py-2"
+              style={{
+                border: '1px solid #E5E7EB',
+                background: '#FFFFFF',
+                color: PATIENT_COLORS.textSecondary,
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Feature navigation cards */}
-      <div>
-        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-          Explore features
-        </p>
-        <div className="grid gap-5 sm:grid-cols-3">
-          {FEATURE_CARDS.map(({ view, title, description, accent, border, badge, icon }) => (
-            <button
-              key={view}
-              type="button"
-              onClick={() => onNavigate(view)}
-              className={`group flex flex-col gap-4 rounded-[2rem] border ${border} bg-gradient-to-br ${accent} p-6 text-left shadow-lg transition hover:scale-[1.015] hover:shadow-xl`}
+      <div className="mb-5 grid gap-5 lg:grid-cols-[1fr_340px]">
+        <div className="rounded-2xl p-6" style={cardStyle}>
+          <BrandEyebrow className="mb-4">Your Profile</BrandEyebrow>
+
+          <div
+            className="flex items-center gap-4 pb-5"
+            style={{ borderBottom: `1px solid ${PATIENT_COLORS.divider}` }}
+          >
+            <div
+              className="flex shrink-0 items-center justify-center rounded-full"
+              style={{
+                width: 48,
+                height: 48,
+                background: AUTHI_GRADIENT,
+                color: '#fff',
+                fontSize: '18px',
+                fontWeight: 700,
+              }}
             >
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${badge}`}>
-                {icon}
+              {initial}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p style={{ fontSize: '16px', fontWeight: 600, color: PATIENT_COLORS.textPrimary }}>
+                {personaName}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {planLabel && (
+                  <span
+                    className="rounded-full px-3 py-1"
+                    style={{
+                      background: AUTHI_GRADIENT_SOFT,
+                      color: AUTHI_PURPLE,
+                      fontSize: '12px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {planLabel}
+                  </span>
+                )}
+                {locationLabel && (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-3 py-1"
+                    style={{
+                      background: '#F3F4F6',
+                      color: PATIENT_COLORS.textSecondary,
+                      fontSize: '12px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    <MapPin />
+                    {locationLabel}
+                  </span>
+                )}
+              </div>
+            </div>
+            {onEditProfile && (
+              <button
+                type="button"
+                onClick={onEditProfile}
+                className="shrink-0 rounded-xl px-4 py-2"
+                style={{
+                  border: '1px solid #E5E7EB',
+                  background: '#FFFFFF',
+                  color: '#374151',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                Edit profile
+              </button>
+            )}
+          </div>
+
+          <div className="pt-5">
+            <BrandEyebrow className="mb-2">Chronic Conditions</BrandEyebrow>
+            {hasConditions ? (
+              <div className="flex flex-wrap gap-2">
+                {(profile.conditions ?? []).map((id) => {
+                  const label = getConditionLabel(id);
+                  return (
+                    <span
+                      key={id}
+                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"
+                      style={{
+                        background: '#F3F4F6',
+                        color: PATIENT_COLORS.textPrimary,
+                        fontSize: '13px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      <Activity />
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style={{ fontSize: '13px', color: PATIENT_COLORS.textSecondary }}>
+                None added yet.{' '}
+                {onEditProfile && (
+                  <button
+                    type="button"
+                    onClick={onEditProfile}
+                    style={{
+                      color: AUTHI_PURPLE,
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Add conditions
+                  </button>
+                )}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {networkNames && (
+          <div className="rounded-2xl p-6" style={cardStyle}>
+            <BrandEyebrow className="mb-3">Hospital Networks on Your Plan</BrandEyebrow>
+            <div
+              className="mb-3 flex items-center gap-3 rounded-xl p-4"
+              style={{ background: AUTHI_GRADIENT_SOFT }}
+            >
+              <div
+                className="flex shrink-0 items-center justify-center rounded-lg"
+                style={{ width: 36, height: 36, background: AUTHI_GRADIENT }}
+              >
+                <span style={{ color: '#fff' }}>
+                  <Building2 />
+                </span>
               </div>
               <div>
-                <p className="text-base font-semibold text-white">{title}</p>
-                <p className="mt-1.5 text-sm leading-6 text-slate-400 group-hover:text-slate-300">
-                  {description}
+                <p style={{ fontSize: '14px', fontWeight: 600, color: PATIENT_COLORS.textPrimary }}>
+                  {networkNames}
+                </p>
+                <p style={{ fontSize: '12px', color: PATIENT_COLORS.textSecondary, marginTop: 1 }}>
+                  Network hospitals
                 </p>
               </div>
-              <div className="mt-auto flex items-center gap-1.5 text-xs font-medium text-slate-400 group-hover:text-slate-300">
-                Open
-                <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                </svg>
-              </div>
+            </div>
+            <p style={{ fontSize: '12px', color: PATIENT_COLORS.textMuted }}>
+              Use the Hospitals tab to search near you.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-2xl p-6" style={cardStyle}>
+        <BrandEyebrow className="mb-3.5">Also Explore</BrandEyebrow>
+        {ALSO_EXPLORE_ITEMS.map((item, i) => (
+          <div
+            key={item.view}
+            className="flex items-center justify-between py-4"
+            style={{ borderTop: i === 0 ? 'none' : `1px solid ${PATIENT_COLORS.divider}` }}
+          >
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: PATIENT_COLORS.textPrimary }}>
+                {item.label}
+              </p>
+              <p style={{ fontSize: '12px', color: PATIENT_COLORS.textMuted, marginTop: 2 }}>
+                {item.description}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate(item.view)}
+              className="flex items-center gap-1.5 rounded-xl px-4 py-2"
+              style={{
+                background: AUTHI_GRADIENT,
+                color: '#FFFFFF',
+                fontSize: '13px',
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Open
+              <ArrowRight size={13} />
             </button>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
-      {/* Disclaimer */}
-      <div className="rounded-2xl border border-amber-300/20 bg-amber-300/8 px-5 py-4 text-sm leading-6 text-amber-50/80">
-        This is a prototype assistant based on the supplied Discovery Health PDFs. Always confirm
-        final benefit rules, authorisation requirements, and plan-specific cover with Discovery Health
-        directly.
-      </div>
-
+      <p
+        className="mt-8 text-center"
+        style={{ fontSize: '12px', color: PATIENT_COLORS.textMuted }}
+      >
+        {SCHEME_SOURCE_NOTE}
+      </p>
     </div>
   );
 }

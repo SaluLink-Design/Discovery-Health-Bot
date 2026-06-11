@@ -200,12 +200,18 @@ def discover_cdl_conditions_from_medicine_pdf(medicine_pdf_path: Path) -> dict[s
     return discovered
 
 
+def _parse_r_amount(line: str) -> int | None:
+    match = re.match(r"^R(\d+)\b", line.strip(), re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
 def build_medicine_index(medicine_pdf_path: Path) -> dict[str, list[dict[str, str]]]:
     """
     Build a per-condition medicine list from the formulary PDF.
 
     Output is intentionally lightweight: a list of medicine rows (label/detail).
-    This is enough for UI display and avoids brittle table parsing.
+    CDA amounts (Core/Saver vs Executive/Comprehensive) are attached when the
+    PDF lists R-amount pairs after each ingredient group.
     """
     condition_display = discover_cdl_conditions_from_medicine_pdf(medicine_pdf_path)
     condition_keys = set(_canonical_condition_keys())
@@ -214,6 +220,15 @@ def build_medicine_index(medicine_pdf_path: Path) -> dict[str, list[dict[str, st
     index: dict[str, list[dict[str, str]]] = {key: [] for key in condition_keys}
     pending_note: str | None = None
     current_keys: list[str] = []
+    condition_cda_defaults: dict[str, tuple[int, int]] = {}
+    pending_cda_batches: dict[str, list[dict[str, str]]] = {}
+
+    def apply_cda_pair(r1: int, r2: int) -> None:
+        for key in current_keys:
+            for row in pending_cda_batches.get(key, []):
+                row["cdaCore"] = r1
+                row["cdaExec"] = r2
+            pending_cda_batches[key] = []
 
     i = 0
     while i < len(lines):
@@ -225,6 +240,12 @@ def build_medicine_index(medicine_pdf_path: Path) -> dict[str, list[dict[str, st
             if r2_idx < len(lines) and _R_AMOUNT_RE.match(lines[r1_idx]) and _R_AMOUNT_RE.match(lines[r2_idx]):
                 current_keys = [k for k in keys if k in condition_keys]
                 pending_note = None
+                r1 = _parse_r_amount(lines[r1_idx])
+                r2 = _parse_r_amount(lines[r2_idx])
+                if r1 is not None and r2 is not None:
+                    for key in current_keys:
+                        condition_cda_defaults[key] = (r1, r2)
+                        pending_cda_batches[key] = []
                 i += consumed + 2
                 continue
 
@@ -232,8 +253,24 @@ def build_medicine_index(medicine_pdf_path: Path) -> dict[str, list[dict[str, st
             i += 1
             continue
 
-        # Notes like "(Not available on KeyCare plans)"
         line = lines[i].strip()
+
+        # CDA pair after an ingredient group (e.g. R535 / R535 after Montelukast brands)
+        if _R_AMOUNT_RE.match(line):
+            r1 = _parse_r_amount(line)
+            r2 = r1
+            extra = 0
+            if i + 1 < len(lines) and _R_AMOUNT_RE.match(lines[i + 1].strip()):
+                parsed = _parse_r_amount(lines[i + 1].strip())
+                if parsed is not None:
+                    r2 = parsed
+                    extra = 1
+            if r1 is not None and r2 is not None:
+                apply_cda_pair(r1, r2)
+            i += 1 + extra
+            continue
+
+        # Notes like "(Not available on KeyCare plans)"
         if line.startswith("(") and line.endswith(")"):
             pending_note = line.strip("()")
             i += 1
@@ -245,7 +282,13 @@ def build_medicine_index(medicine_pdf_path: Path) -> dict[str, list[dict[str, st
             if pending_note:
                 detail = f"{detail} Note: {pending_note}."
             for key in current_keys:
-                index[key].append({"label": line, "detail": detail})
+                row: dict[str, str | int] = {"label": line, "detail": detail}
+                defaults = condition_cda_defaults.get(key)
+                if defaults:
+                    row["cdaCore"] = defaults[0]
+                    row["cdaExec"] = defaults[1]
+                index[key].append(row)
+                pending_cda_batches.setdefault(key, []).append(row)
             pending_note = None
 
         i += 1

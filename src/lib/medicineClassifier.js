@@ -190,7 +190,7 @@ export const classifyMedicine = (classHint = '', label = '') => {
  */
 export const isCoveredByPlan = (med, planId) => {
   if (!planId) return true;
-  if (med.notCoveredKeycare && planId === 'core') return false;
+  if (med.notCoveredKeycare && ['core', 'keycare'].includes(planId)) return false;
   if (med.execCompOnly && !['executive', 'comprehensive'].includes(planId)) return false;
   return true;
 };
@@ -200,7 +200,7 @@ export const isCoveredByPlan = (med, planId) => {
  */
 export const coverageBadge = (med, planId) => {
   if (!planId) return { covered: true, label: 'Formulary medicine', colour: 'emerald' };
-  if (med.notCoveredKeycare && planId === 'core')
+  if (med.notCoveredKeycare && ['core', 'keycare'].includes(planId))
     return { covered: false, label: 'Not covered on Core / KeyCare plan', colour: 'amber' };
   if (med.execCompOnly && !['executive', 'comprehensive'].includes(planId))
     return { covered: false, label: 'Executive & Comprehensive plans only', colour: 'orange' };
