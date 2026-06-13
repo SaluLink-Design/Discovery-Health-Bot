@@ -95,6 +95,7 @@ _CDL_CANONICAL: dict[str, list[str]] = {
     "chronic obstructive pulmonary disease": [
         "Chronic obstructive pulmonary disease",
         "Chronic obstructive pulmonary disorder",
+        "Chronic obstructive pulmonary disease (COPD)",
         "disease (COPD)",
         "disease (COPD )",
         "COPD",
@@ -123,7 +124,11 @@ _CDL_CANONICAL: dict[str, list[str]] = {
     "parkinson's disease": ["Parkinson's disease", "Parkinson’s disease"],
     "rheumatoid arthritis": ["Rheumatoid arthritis", "Rheumatoid Arthritis"],
     "schizophrenia": ["Schizophrenia"],
-    "systemic lupus erythematosus": ["Systemic lupus erythematosus", "Systemic Lupus Erythematosus"],
+    "systemic lupus erythematosus": [
+        "Systemic lupus erythematosus",
+        "Systemic Lupus Erythematosus",
+        "Systemic lupus erythematosus (SLE)",
+    ],
     "ulcerative colitis": ["Ulcerative colitis", "Ulcerative Colitis"],
 }
 
@@ -142,11 +147,11 @@ for key, variants in _CDL_CANONICAL.items():
 def _match_cdl_condition_heading(lines: list[str], i: int) -> tuple[list[str], int] | None:
     """
     Attempt to match a canonical CDL condition heading starting at `i`,
-    allowing headings split across multiple lines (up to 3).
+    allowing headings split across multiple lines (up to 5).
 
     Returns (keys, consumed_lines).
     """
-    for consumed in (3, 2, 1):
+    for consumed in (5, 4, 3, 2, 1):
         if i + consumed > len(lines):
             continue
         joined = " ".join(lines[i : i + consumed]).strip()
@@ -157,6 +162,17 @@ def _match_cdl_condition_heading(lines: list[str], i: int) -> tuple[list[str], i
                 return (["diabetes mellitus type 1", "diabetes mellitus type 2"], consumed)
             return ([key], consumed)
     return None
+
+
+_PAREN_ONLY_RE = re.compile(r"^\([^)]+\)$")
+
+
+def _skip_heading_suffix_lines(lines: list[str], start: int) -> int:
+    """Skip parenthetical suffixes like (SLE) that sit between headings and R amounts."""
+    idx = start
+    while idx < len(lines) and _PAREN_ONLY_RE.match(lines[idx].strip()):
+        idx += 1
+    return idx
 
 
 def discover_cdl_conditions_from_medicine_pdf(medicine_pdf_path: Path) -> dict[str, str]:
@@ -178,8 +194,8 @@ def discover_cdl_conditions_from_medicine_pdf(medicine_pdf_path: Path) -> dict[s
             continue
 
         keys, consumed = match
-        r1_idx = i + consumed
-        r2_idx = i + consumed + 1
+        r1_idx = _skip_heading_suffix_lines(lines, i + consumed)
+        r2_idx = r1_idx + 1
         if r2_idx >= len(lines):
             i += 1
             continue
@@ -191,7 +207,7 @@ def discover_cdl_conditions_from_medicine_pdf(medicine_pdf_path: Path) -> dict[s
         for key in keys:
             discovered.setdefault(key, display)
 
-        i += consumed + 2
+        i = r2_idx + 1
 
     # Ensure we always have display labels for all canonical conditions.
     for key in _canonical_condition_keys():
@@ -235,8 +251,8 @@ def build_medicine_index(medicine_pdf_path: Path) -> dict[str, list[dict[str, st
         match = _match_cdl_condition_heading(lines, i)
         if match:
             keys, consumed = match
-            r1_idx = i + consumed
-            r2_idx = i + consumed + 1
+            r1_idx = _skip_heading_suffix_lines(lines, i + consumed)
+            r2_idx = r1_idx + 1
             if r2_idx < len(lines) and _R_AMOUNT_RE.match(lines[r1_idx]) and _R_AMOUNT_RE.match(lines[r2_idx]):
                 current_keys = [k for k in keys if k in condition_keys]
                 pending_note = None
@@ -246,7 +262,7 @@ def build_medicine_index(medicine_pdf_path: Path) -> dict[str, list[dict[str, st
                     for key in current_keys:
                         condition_cda_defaults[key] = (r1, r2)
                         pending_cda_batches[key] = []
-                i += consumed + 2
+                i = r2_idx + 1
                 continue
 
         if not current_keys:

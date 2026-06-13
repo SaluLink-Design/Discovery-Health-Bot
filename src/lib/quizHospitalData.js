@@ -4,7 +4,7 @@ import {
   buildHospitalQuizQuestions,
   pickHospitalExamples,
 } from './hospitalQuizBlueprint';
-import { personaName } from './quizShared';
+import { personaName, speakablePlanLabel } from './quizShared';
 
 const resolveProvince = (profile) => {
   const raw = profile?.province ?? '';
@@ -53,9 +53,10 @@ export const buildHospitalResultSummary = (profile) => {
     bullets: [
       `Planned admissions at hospitals on ${networks} are your lowest-risk choice for cover.`,
       `Hospitals outside those networks may still admit you, but planned procedures there usually mean paying much more out of pocket.`,
-      `Use Find hospitals on my plan below to search near ${town} — toggle "On my plan" and "Outside my plan" to compare.`,
+      `Use Find hospitals on my plan below to view your hospital networks near ${town} — toggle "On my plan" and "Outside my plan" to compare.`,
     ],
-    speechText: `On ${planLabel}, planned care at hospitals on ${networks} is your safest choice — lowest out-of-pocket cost. Outside your plan network, you could pay much more out of pocket.`,
+    speechText: `On ${speakablePlanLabel(planLabel)}, planned care at hospitals on ${networks} is your safest choice — lowest out-of-pocket cost. Outside your plan network, you could pay much more out of pocket. When you are ready, use Find hospitals on my plan below to view your hospital networks and compare costs near you.`,
+    cta: 'View your hospital networks below to search near you and compare on-plan vs off-plan hospitals.',
   };
 };
 

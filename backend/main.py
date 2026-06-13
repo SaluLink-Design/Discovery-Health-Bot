@@ -2,13 +2,24 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import json
+import os
 import re
+import smtplib
+import ssl
+import urllib.error
+import urllib.request
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
+import certifi
 import fitz
+from dotenv import load_dotenv
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from backend.cdl_bundled import bundled_medicines, bundled_treatment
 from backend.cdl_indexes import (
     build_medicine_index,
     build_treatment_index,
@@ -34,6 +45,10 @@ from backend.hospital_network_index import (
 )
 
 ROOT = Path(__file__).resolve().parent.parent
+
+load_dotenv(ROOT / ".env")
+
+CUSTOMER_SURVEY_FORM_URL = "https://tally.so/r/n0D6Yq"
 
 PDF_SOURCES = [
     {
@@ -635,6 +650,117 @@ def health() -> dict[str, Any]:
     }
 
 
+class SurveyInviteRequest(BaseModel):
+    email: str
+
+
+def _survey_invite_html() -> str:
+    return f"""
+    <p>Thank you for trying SaluLink.</p>
+    <p>We'd love your optional feedback on our medical aid literacy MVP.
+    Survey responses are anonymised — no name or ID number is required.</p>
+    <p><a href="{CUSTOMER_SURVEY_FORM_URL}">Open the survey</a></p>
+    <p>It should only take a few minutes. You can skip any question.</p>
+    """
+
+
+def _send_survey_via_smtp(email: str) -> tuple[bool, str | None]:
+    smtp_user = os.getenv("SMTP_USER", "").strip()
+    smtp_password = os.getenv("SMTP_APP_PASSWORD", "").strip()
+    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com").strip()
+    smtp_port = int(os.getenv("SMTP_PORT", "465"))
+
+    if not smtp_user or not smtp_password:
+        return False, None
+
+    subject = "SaluLink — optional feedback survey"
+    html = _survey_invite_html()
+    plain = (
+        "Thank you for trying SaluLink.\n\n"
+        f"Open the optional survey here: {CUSTOMER_SURVEY_FORM_URL}\n\n"
+        "Survey responses are anonymised. It only takes a few minutes."
+    )
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = subject
+    message["From"] = smtp_user
+    message["To"] = email
+    message.attach(MIMEText(plain, "plain"))
+    message.attach(MIMEText(html, "html"))
+
+    try:
+        with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=15) as server:
+            server.login(smtp_user, smtp_password)
+            server.sendmail(smtp_user, [email], message.as_string())
+        return True, "smtp"
+    except smtplib.SMTPException:
+        return False, "smtp_failed"
+
+
+def _send_survey_via_resend(email: str) -> tuple[bool, str | None]:
+    api_key = os.getenv("RESEND_API_KEY", "").strip()
+    from_email = os.getenv("SURVEY_FROM_EMAIL", "SaluLink <onboarding@resend.dev>").strip()
+
+    if not api_key:
+        return False, None
+
+    subject = "SaluLink — optional feedback survey"
+    html = _survey_invite_html()
+
+    payload = json.dumps(
+        {
+            "from": from_email,
+            "to": [email],
+            "subject": subject,
+            "html": html,
+        }
+    ).encode("utf-8")
+
+    request = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "User-Agent": "SaluLink/1.0",
+        },
+        method="POST",
+    )
+
+    try:
+        context = ssl.create_default_context(cafile=certifi.where())
+        with urllib.request.urlopen(request, timeout=15, context=context) as response:
+            if 200 <= response.status < 300:
+                return True, "resend"
+            return False, f"resend_status_{response.status}"
+    except urllib.error.HTTPError as exc:
+        return False, f"resend_http_{exc.code}"
+    except urllib.error.URLError:
+        return False, "resend_unreachable"
+
+
+def _send_survey_invite_email(email: str) -> tuple[bool, str | None]:
+    sent, reason = _send_survey_via_smtp(email)
+    if sent:
+        return sent, reason
+
+    sent, reason = _send_survey_via_resend(email)
+    if sent:
+        return sent, reason
+
+    return False, "email_not_configured"
+
+
+@app.post("/api/survey/send-invite")
+def send_survey_invite(body: SurveyInviteRequest) -> dict[str, Any]:
+    email = body.email.strip()
+    if not email or "@" not in email:
+        return {"ok": False, "error": "Invalid email", "sent": False}
+
+    sent, reason = _send_survey_invite_email(email)
+    return {"ok": True, "sent": sent, "reason": reason}
+
+
 @app.post("/api/ask")
 def ask(request: AskRequest) -> dict[str, Any]:
     return ask_authi(request.query, explicit_network_codes=request.networkCodes or None)
@@ -783,6 +909,7 @@ _FRONTEND_TO_CDL_KEY: dict[str, str] = {
     "schizophrenia": "schizophrenia",
     "lupus": "systemic lupus erythematosus",
     "ulcerative_colitis": "ulcerative colitis",
+    "chronic_renal": "chronic renal disease",
 }
 
 import re as _re
@@ -904,6 +1031,13 @@ def get_treatments_for_condition(condition_id: str) -> dict[str, Any]:
     diagnostic = _clean([it for it in raw_items if it.get("type") == "diagnostic"])
     ongoing = _clean([it for it in raw_items if it.get("type") == "ongoing"])
 
+    if not diagnostic or not ongoing:
+        fallback_diag, fallback_ongo = bundled_treatment(condition_id)
+        if not diagnostic:
+            diagnostic = fallback_diag
+        if not ongoing:
+            ongoing = fallback_ongo
+
     return {"conditionId": condition_id, "diagnostic": diagnostic, "ongoing": ongoing}
 
 
@@ -966,6 +1100,9 @@ def get_medications_for_condition(condition_id: str) -> dict[str, Any]:
         if item.get("cdaExec") is not None:
             entry["cdaExec"] = item["cdaExec"]
         medicines.append(entry)
+
+    if not medicines:
+        medicines = bundled_medicines(condition_id)
 
     return {"conditionId": condition_id, "medicines": medicines}
 

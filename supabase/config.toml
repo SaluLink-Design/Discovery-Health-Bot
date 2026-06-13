@@ -1,0 +1,5 @@
+[project]
+id = "bzhalwgbjaexswwwnxhx"
+
+[functions.send-survey-invite]
+verify_jwt = false

@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/SaluLink-Design/Discovery-Health-Bot#readme",
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.108.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",

@@ -150,6 +150,25 @@ export const getNextCampaignModule = (profile) => {
   return order.find((id) => !isModuleUnlocked(id)) ?? null;
 };
 
+/** Next module in journey order after the one just completed. */
+export const getNextCampaignModuleAfter = (currentModuleId, profile) => {
+  const order = getCampaignModuleOrder(profile);
+  const idx = order.indexOf(currentModuleId);
+  if (idx === -1 || idx >= order.length - 1) return null;
+  return order[idx + 1];
+};
+
+/** First incomplete module after the current one in journey order. */
+export const getNextIncompleteModuleAfter = (currentModuleId, profile) => {
+  const order = getCampaignModuleOrder(profile);
+  const idx = order.indexOf(currentModuleId);
+  if (idx === -1) return null;
+  for (let i = idx + 1; i < order.length; i += 1) {
+    if (!isModuleUnlocked(order[i])) return order[i];
+  }
+  return null;
+};
+
 export const getCampaignProgressSummary = (profile) => {
   const order = getCampaignModuleOrder(profile);
   const state = loadCampaignState();

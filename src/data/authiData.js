@@ -394,6 +394,7 @@ export const CDL_CONDITIONS = [
   { id: 'cardiac_failure', label: 'Cardiac Failure' },
   { id: 'cardiomyopathy', label: 'Cardiomyopathy' },
   { id: 'copd', label: 'Chronic Obstructive Pulmonary Disorder (COPD)' },
+  { id: 'chronic_renal', label: 'Chronic Renal Disease' },
   { id: 'coronary_artery', label: 'Coronary Artery Disease' },
   { id: 'crohns', label: "Crohn's Disease" },
   { id: 'diabetes_insipidus', label: 'Diabetes Insipidus' },
@@ -721,6 +722,25 @@ export const CDL_CONDITION_DETAILS = {
     guidance: [
       'Antiretroviral therapy is a PMB benefit — confirm chronic approval.',
       'Opportunistic infection prophylaxis may be covered when CD4 is low.',
+    ],
+  },
+  chronic_renal: {
+    title: 'Chronic Renal Disease',
+    summary: 'Long-term kidney disease requiring monitoring and often blood-pressure and renal-protective medicines.',
+    treatment: {
+      diagnostic: [
+        { code: 'CRD-101', desc: 'Renal function panel (creatinine, eGFR)', count: 2 },
+        { code: 'CRD-102', desc: 'Nephrologist consultation', count: 2 },
+      ],
+      ongoing: [
+        { code: 'CRD-201', desc: 'Renal function monitoring', count: 4 },
+        { code: 'CRD-202', desc: 'Blood pressure and urine protein review', count: 2 },
+      ],
+    },
+    medications: ['ACE inhibitors', 'ARBs', 'Diuretics', 'Phosphate binders (if indicated)'],
+    guidance: [
+      'Confirm chronic medicine approval for renal-protective therapy.',
+      'Dialysis and transplant pathways have separate authorisation rules — ask your scheme.',
     ],
   },
   hyperlipidaemia: {

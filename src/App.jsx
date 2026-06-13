@@ -22,6 +22,7 @@ import {
 import { buildDefaultMemberDraft } from './data/demoCharacters';
 import { loadProfile, saveProfile, clearProfile } from './lib/profileStore';
 import { clearPrescriptions, loadPrescriptions, savePrescriptions, seedDemoData } from './lib/prescriptionStore';
+import { stopSpeaking } from './lib/speech';
 
 export default function App() {
   const [profile, setProfile] = useState(() => loadProfile());
@@ -136,6 +137,8 @@ export default function App() {
   const showMemberLanding = CAMPAIGN_MEMBER_MODE && !profile && !setupDraft && !isEditingProfile;
   const showProfileSetup = setupDraft || (isEditingProfile && profile) || (!CAMPAIGN_MEMBER_MODE && !profile);
 
+  useEffect(() => () => stopSpeaking(), [currentView, showMemberLanding, showProfileSetup]);
+
   const profilePanelSeed = isEditingProfile && profile ? profile : setupDraft;
 
   if (showMemberLanding) {
@@ -224,6 +227,7 @@ export default function App() {
                 onNavigate={setCurrentView}
                 highlightOffPlan={hospitalHighlightOffPlan}
                 campaignRefreshKey={CAMPAIGN_LITERACY_ENABLED ? campaignRefresh : undefined}
+                onCampaignProgress={bumpCampaign}
               />
             )}
             {currentView === 'treatment' && (
@@ -234,6 +238,7 @@ export default function App() {
                 onEditProfile={handleEditProfile}
                 prescriptions={prescriptions}
                 campaignRefreshKey={CAMPAIGN_LITERACY_ENABLED ? campaignRefresh : undefined}
+                onCampaignProgress={bumpCampaign}
                 browseAllConditions={browseAllConditions}
                 onBrowseAllConditionsChange={setBrowseAllConditions}
               />
@@ -246,6 +251,7 @@ export default function App() {
                 onEditProfile={handleEditProfile}
                 prescriptions={prescriptions}
                 campaignRefreshKey={CAMPAIGN_LITERACY_ENABLED ? campaignRefresh : undefined}
+                onCampaignProgress={bumpCampaign}
                 browseAllConditions={browseAllConditions}
                 onBrowseAllConditionsChange={setBrowseAllConditions}
               />

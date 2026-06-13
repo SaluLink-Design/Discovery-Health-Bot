@@ -1,4 +1,4 @@
-import { speakText } from './speech';
+import { speakText, stopSpeaking } from './speech';
 
 /** Default TTS rate — slightly below 1 for natural conversational pace. */
 export const AUTHI_SPEECH_RATE = 0.95;
@@ -20,24 +20,39 @@ export const buildSpokenModuleIntro = (introSpeech, quizPitch) =>
 
 /**
  * Speak module intro once; `onComplete` fires on end, error, or estimated duration.
- * The timer is not cleared externally — callers should guard `onComplete` with a cancelled flag.
+ * Returns `cancel` — call it when leaving the page or unmounting to stop speech immediately.
  */
 export const speakModuleIntro = ({ text, onComplete }) => {
   let finished = false;
+  let fallbackTimer = null;
+
+  const clearFallback = () => {
+    if (fallbackTimer != null) {
+      window.clearTimeout(fallbackTimer);
+      fallbackTimer = null;
+    }
+  };
 
   const finish = () => {
     if (finished) return;
     finished = true;
-    window.clearTimeout(fallbackTimer);
+    clearFallback();
     onComplete?.();
+  };
+
+  const cancel = () => {
+    if (finished) return;
+    finished = true;
+    clearFallback();
+    stopSpeaking();
   };
 
   if (!text?.trim()) {
     finish();
-    return;
+    return cancel;
   }
 
-  const fallbackTimer = window.setTimeout(finish, estimateSpeechMs(text));
+  fallbackTimer = window.setTimeout(finish, estimateSpeechMs(text));
 
   const started = speakText(text, {
     raw: true,
@@ -46,4 +61,6 @@ export const speakModuleIntro = ({ text, onComplete }) => {
   });
 
   if (!started) finish();
+
+  return cancel;
 };

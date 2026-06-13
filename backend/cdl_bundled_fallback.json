@@ -1,0 +1,1162 @@
+{
+  "addisons": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "ADD-101",
+          "desc": "Cortisol and ACTH stimulation test",
+          "count": 1
+        },
+        {
+          "code": "ADD-102",
+          "desc": "Endocrinologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "ADD-201",
+          "desc": "Routine hormone monitoring",
+          "count": 4
+        },
+        {
+          "code": "ADD-202",
+          "desc": "Annual specialist review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Hydrocortisone",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Fludrocortisone",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "asthma": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "1188 or 1186",
+          "desc": "Flow volume test (spirometry)",
+          "count": 1
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "1192",
+          "desc": "Peak flow monitoring",
+          "count": 3
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Ventimax CFC free 200 dose 100mcg",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Symbicord turbohaler 60 dose 160/4.5mcg",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Atrovent HFA 200 dose 20mcg",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "bronchiectasis": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "BRO-101",
+          "desc": "CT chest scan",
+          "count": 1
+        },
+        {
+          "code": "BRO-102",
+          "desc": "Pulmonologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "BRO-201",
+          "desc": "Sputum culture and sensitivity",
+          "count": 2
+        },
+        {
+          "code": "BRO-202",
+          "desc": "Physiotherapy (airway clearance)",
+          "count": 12
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Inhaled bronchodilators",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Prophylactic antibiotics (if prescribed)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Mucolytics",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "cardiac_failure": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "CF-101",
+          "desc": "Echocardiogram",
+          "count": 1
+        },
+        {
+          "code": "CF-102",
+          "desc": "Cardiologist assessment",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "CF-201",
+          "desc": "NT-proBNP blood test",
+          "count": 2
+        },
+        {
+          "code": "CF-202",
+          "desc": "Routine cardiologist review",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "ACE inhibitors / ARBs",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Beta-blockers",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Diuretics",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Aldosterone antagonists",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "cardiomyopathy": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "CM-101",
+          "desc": "Cardiac MRI or echocardiogram",
+          "count": 1
+        },
+        {
+          "code": "CM-102",
+          "desc": "Genetic counselling (if hereditary)",
+          "count": 1
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "CM-201",
+          "desc": "Annual echocardiogram",
+          "count": 1
+        },
+        {
+          "code": "CM-202",
+          "desc": "Cardiologist review",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Beta-blockers",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "ACE inhibitors",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Anticoagulants (if indicated)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "copd": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "COPD-101",
+          "desc": "Spirometry (lung function test)",
+          "count": 1
+        },
+        {
+          "code": "COPD-102",
+          "desc": "Chest X-ray",
+          "count": 1
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "COPD-201",
+          "desc": "Annual spirometry review",
+          "count": 1
+        },
+        {
+          "code": "COPD-202",
+          "desc": "Pulmonologist or GP review",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Long-acting bronchodilators (LABA/LAMA)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Inhaled corticosteroids",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Rescue inhalers",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "chronic_renal": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "CRD-101",
+          "desc": "Renal function panel (creatinine, eGFR)",
+          "count": 2
+        },
+        {
+          "code": "CRD-102",
+          "desc": "Nephrologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "CRD-201",
+          "desc": "Renal function monitoring",
+          "count": 4
+        },
+        {
+          "code": "CRD-202",
+          "desc": "Blood pressure and urine protein review",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "ACE inhibitors",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "ARBs",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Diuretics",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Phosphate binders (if indicated)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "coronary_artery": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "CAD-101",
+          "desc": "Coronary angiogram",
+          "count": 1
+        },
+        {
+          "code": "CAD-102",
+          "desc": "Stress ECG",
+          "count": 1
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "CAD-201",
+          "desc": "Lipid profile monitoring",
+          "count": 2
+        },
+        {
+          "code": "CAD-202",
+          "desc": "Cardiologist review",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Statins",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Aspirin / antiplatelet agents",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Beta-blockers",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Nitrates",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "crohns": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "CD-101",
+          "desc": "Colonoscopy with biopsy",
+          "count": 1
+        },
+        {
+          "code": "CD-102",
+          "desc": "Gastroenterologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "CD-201",
+          "desc": "CRP / faecal calprotectin",
+          "count": 2
+        },
+        {
+          "code": "CD-202",
+          "desc": "Annual endoscopic review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "5-ASA agents",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Corticosteroids (for flares)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Immunomodulators",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Biologics (if indicated)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "diabetes_insipidus": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "DI-101",
+          "desc": "Water deprivation test",
+          "count": 1
+        },
+        {
+          "code": "DI-102",
+          "desc": "Endocrinologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "DI-201",
+          "desc": "Serum sodium and osmolality monitoring",
+          "count": 4
+        },
+        {
+          "code": "DI-202",
+          "desc": "MRI brain (if central DI)",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Desmopressin (DDAVP)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "diabetes_type1": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "DM1-101",
+          "desc": "HbA1c test",
+          "count": 2
+        },
+        {
+          "code": "DM1-102",
+          "desc": "Endocrinologist or GP assessment",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "DM1-201",
+          "desc": "GP or specialist review",
+          "count": 4
+        },
+        {
+          "code": "DM1-202",
+          "desc": "Annual eye, foot, and kidney screen",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Basal insulin",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Rapid-acting insulin",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Continuous glucose monitoring supplies",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "diabetes_type2": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "DM2-101",
+          "desc": "HbA1c test",
+          "count": 2
+        },
+        {
+          "code": "DM2-102",
+          "desc": "GP or specialist assessment",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "DM2-201",
+          "desc": "GP consultation",
+          "count": 4
+        },
+        {
+          "code": "DM2-202",
+          "desc": "Follow-up pathology monitoring",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Metformin",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Insulin analogues",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Glucose monitoring supplies",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "dysrhythmias": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "DYS-101",
+          "desc": "24-hour Holter monitor",
+          "count": 1
+        },
+        {
+          "code": "DYS-102",
+          "desc": "Cardiologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "DYS-201",
+          "desc": "ECG monitoring",
+          "count": 2
+        },
+        {
+          "code": "DYS-202",
+          "desc": "Annual cardiologist review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Antiarrhythmic agents",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Anticoagulants (if AF)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Beta-blockers",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "epilepsy": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "EPI-101",
+          "desc": "EEG (electroencephalogram)",
+          "count": 1
+        },
+        {
+          "code": "EPI-102",
+          "desc": "Neurologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "EPI-201",
+          "desc": "Drug level monitoring (if applicable)",
+          "count": 2
+        },
+        {
+          "code": "EPI-202",
+          "desc": "Annual neurologist review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Sodium valproate",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Lamotrigine",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Levetiracetam",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Carbamazepine",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "glaucoma": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "GLA-101",
+          "desc": "Intraocular pressure measurement",
+          "count": 2
+        },
+        {
+          "code": "GLA-102",
+          "desc": "Ophthalmologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "GLA-201",
+          "desc": "Visual field testing",
+          "count": 2
+        },
+        {
+          "code": "GLA-202",
+          "desc": "Annual optic disc review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Prostaglandin analogues (eye drops)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Beta-blocker eye drops",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Carbonic anhydrase inhibitors",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "haemophilia": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "HAE-101",
+          "desc": "Clotting factor assay",
+          "count": 1
+        },
+        {
+          "code": "HAE-102",
+          "desc": "Haematologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "HAE-201",
+          "desc": "Inhibitor titre testing",
+          "count": 1
+        },
+        {
+          "code": "HAE-202",
+          "desc": "Annual haematologist review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Factor VIII / IX concentrate",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Emicizumab (if indicated)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Desmopressin",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "hiv": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "HIV-101",
+          "desc": "CD4 count and viral load",
+          "count": 2
+        },
+        {
+          "code": "HIV-102",
+          "desc": "Infectious disease specialist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "HIV-201",
+          "desc": "Six-monthly viral load monitoring",
+          "count": 2
+        },
+        {
+          "code": "HIV-202",
+          "desc": "Annual specialist review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Tenofovir / Emtricitabine / Efavirenz (single-pill regimen)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Dolutegravir-based regimen",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "hyperlipidaemia": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "HLP-101",
+          "desc": "Full lipid profile",
+          "count": 2
+        },
+        {
+          "code": "HLP-102",
+          "desc": "GP or cardiologist assessment",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "HLP-201",
+          "desc": "Annual lipid profile",
+          "count": 1
+        },
+        {
+          "code": "HLP-202",
+          "desc": "GP review",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Statins",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Ezetimibe",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "PCSK9 inhibitors (if high-risk, pre-auth required)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "hypertension": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "HTN-101",
+          "desc": "24-hour ambulatory BP monitoring",
+          "count": 1
+        },
+        {
+          "code": "HTN-102",
+          "desc": "GP or specialist assessment",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "HTN-201",
+          "desc": "Routine BP check and GP review",
+          "count": 4
+        },
+        {
+          "code": "HTN-202",
+          "desc": "Renal function and electrolytes",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "ACE inhibitors / ARBs",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Calcium channel blockers",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Thiazide diuretics",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "hypothyroidism": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "HYP-101",
+          "desc": "TSH and free T4 test",
+          "count": 2
+        },
+        {
+          "code": "HYP-102",
+          "desc": "GP or endocrinologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "HYP-201",
+          "desc": "Six-monthly TSH monitoring",
+          "count": 2
+        },
+        {
+          "code": "HYP-202",
+          "desc": "Annual specialist review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Levothyroxine (L-thyroxine)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "multiple_sclerosis": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "MS-101",
+          "desc": "MRI brain and spine with contrast",
+          "count": 1
+        },
+        {
+          "code": "MS-102",
+          "desc": "Neurologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "MS-201",
+          "desc": "Annual MRI surveillance",
+          "count": 1
+        },
+        {
+          "code": "MS-202",
+          "desc": "Neurologist review",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Interferon beta",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Glatiramer acetate",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Natalizumab / Ocrelizumab (high-efficacy DMTs)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "parkinsons": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "PD-101",
+          "desc": "Neurologist clinical assessment",
+          "count": 2
+        },
+        {
+          "code": "PD-102",
+          "desc": "DaTscan (if required)",
+          "count": 1
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "PD-201",
+          "desc": "Regular neurologist review",
+          "count": 2
+        },
+        {
+          "code": "PD-202",
+          "desc": "Occupational and speech therapy",
+          "count": 6
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Levodopa / Carbidopa",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Dopamine agonists",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "MAO-B inhibitors",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "rheumatoid_arthritis": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "RA-101",
+          "desc": "Rheumatoid factor and anti-CCP antibodies",
+          "count": 1
+        },
+        {
+          "code": "RA-102",
+          "desc": "Rheumatologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "RA-201",
+          "desc": "CRP / ESR monitoring",
+          "count": 4
+        },
+        {
+          "code": "RA-202",
+          "desc": "Annual rheumatologist review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Methotrexate",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Hydroxychloroquine",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Biological DMARDs (biologic therapy)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "schizophrenia": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "SCH-101",
+          "desc": "Psychiatric assessment and history",
+          "count": 2
+        },
+        {
+          "code": "SCH-102",
+          "desc": "Baseline metabolic screen",
+          "count": 1
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "SCH-201",
+          "desc": "Regular psychiatrist review",
+          "count": 4
+        },
+        {
+          "code": "SCH-202",
+          "desc": "Annual metabolic and ECG monitoring",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Atypical antipsychotics (e.g. risperidone, olanzapine)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Long-acting injectable antipsychotics",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "lupus": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "SLE-101",
+          "desc": "ANA and anti-dsDNA antibody panel",
+          "count": 1
+        },
+        {
+          "code": "SLE-102",
+          "desc": "Rheumatologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "SLE-201",
+          "desc": "Renal function and urine dipstick",
+          "count": 4
+        },
+        {
+          "code": "SLE-202",
+          "desc": "Rheumatologist review",
+          "count": 2
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "Hydroxychloroquine",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Corticosteroids",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Immunosuppressants (azathioprine, mycophenolate)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Biologics (belimumab)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  },
+  "ulcerative_colitis": {
+    "treatment": {
+      "diagnostic": [
+        {
+          "code": "UC-101",
+          "desc": "Colonoscopy with biopsy",
+          "count": 1
+        },
+        {
+          "code": "UC-102",
+          "desc": "Gastroenterologist consultation",
+          "count": 2
+        }
+      ],
+      "ongoing": [
+        {
+          "code": "UC-201",
+          "desc": "CRP / faecal calprotectin",
+          "count": 2
+        },
+        {
+          "code": "UC-202",
+          "desc": "Annual endoscopic review",
+          "count": 1
+        }
+      ]
+    },
+    "medications": [
+      {
+        "label": "5-ASA (mesalazine)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Corticosteroids (for flares)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Immunomodulators",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      },
+      {
+        "label": "Biologics (if indicated)",
+        "classHint": "Formulary",
+        "detail": "Bundled fallback from CDL reference data."
+      }
+    ]
+  }
+}

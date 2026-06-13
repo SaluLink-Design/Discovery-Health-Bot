@@ -7,9 +7,6 @@ import {
   PATIENT_COLORS,
   PATIENT_FONT,
 } from '../lib/authiTheme';
-import {
-  ALSO_EXPLORE_ITEMS,
-} from '../lib/memberFeatures';
 import { DEFAULT_PERSONA_NAME } from '../data/demoCharacters';
 import { CAMPAIGN_LITERACY_ENABLED, SCHEME_SOURCE_NOTE } from '../lib/campaignConfig';
 import { getNextCampaignModule } from '../lib/campaignStore';
@@ -409,42 +406,6 @@ export default function DashboardView({
             </p>
           </div>
         )}
-      </div>
-
-      <div className="rounded-2xl p-6" style={cardStyle}>
-        <BrandEyebrow className="mb-3.5">Also Explore</BrandEyebrow>
-        {ALSO_EXPLORE_ITEMS.map((item, i) => (
-          <div
-            key={item.view}
-            className="flex items-center justify-between py-4"
-            style={{ borderTop: i === 0 ? 'none' : `1px solid ${PATIENT_COLORS.divider}` }}
-          >
-            <div>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: PATIENT_COLORS.textPrimary }}>
-                {item.label}
-              </p>
-              <p style={{ fontSize: '12px', color: PATIENT_COLORS.textMuted, marginTop: 2 }}>
-                {item.description}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onNavigate(item.view)}
-              className="flex items-center gap-1.5 rounded-xl px-4 py-2"
-              style={{
-                background: AUTHI_GRADIENT,
-                color: '#FFFFFF',
-                fontSize: '13px',
-                fontWeight: 600,
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              Open
-              <ArrowRight size={13} />
-            </button>
-          </div>
-        ))}
       </div>
 
       <p

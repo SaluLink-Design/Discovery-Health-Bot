@@ -103,8 +103,10 @@ export default function ScenarioVisual({ visual, meta }) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
         <p className="text-3xl">📋</p>
-        <p className="mt-1 text-xs font-semibold text-amber-900">Doctor motivation letter</p>
-        <p className="mt-0.5 text-[10px] text-[#6B7280]">Discovery reviews before paying</p>
+        <p className="mt-1 text-xs font-semibold text-amber-900">Clinical motivation required</p>
+        <p className="mt-0.5 text-[10px] text-[#6B7280]">
+          Doctor submits supporting documentation — Discovery reviews before paying
+        </p>
       </div>
     );
   }

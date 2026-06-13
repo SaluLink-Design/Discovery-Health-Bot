@@ -20,6 +20,7 @@ import {
 import { isModuleUnlocked } from '../lib/campaignStore';
 import { CAMPAIGN_LITERACY_ENABLED, CAMPAIGN_MEMBER_MODE } from '../lib/campaignConfig';
 import FeaturePageHeader from './FeaturePageHeader';
+import CampaignNextQuizBanner from './CampaignNextQuizBanner';
 import GradientChip from './GradientChip';
 import GoodToKnowCard from './GoodToKnowCard';
 import { PatientButtonPrimary } from './PatientButton';
@@ -239,6 +240,7 @@ export default function TreatmentView({
   onEditProfile,
   prescriptions,
   campaignRefreshKey = 0,
+  onCampaignProgress,
   browseAllConditions = false,
   onBrowseAllConditionsChange,
 }) {
@@ -355,11 +357,19 @@ export default function TreatmentView({
           conditionId={selectedCondition}
           refreshKey={campaignRefreshKey}
           onUnlock={() => setBasketUnlocked(true)}
+          onNavigate={onNavigate}
+          onCampaignProgress={onCampaignProgress}
         />
       )}
 
       {basketUnlocked && (
         <>
+      <CampaignNextQuizBanner
+        moduleId="treatment"
+        profile={profile}
+        onNavigate={onNavigate}
+      />
+
       {/* ── Condition selector ───────────────────── */}
       <div className={PATIENT_CLASSES.card}>
         <BrandEyebrow className="mb-4">Select condition</BrandEyebrow>

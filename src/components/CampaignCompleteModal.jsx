@@ -1,36 +1,15 @@
-import { useState } from 'react';
 import { submitCampaignSave } from '../lib/campaignApi';
 import { markCampaignSaved } from '../lib/campaignStore';
-import { isSupabaseConfigured } from '../lib/supabaseClient';
-import { AUTHI_GRADIENT, PATIENT_COLORS } from '../lib/authiTheme';
-import { PatientButtonPrimary, PatientButtonSecondary } from './PatientButton';
+import { CUSTOMER_SURVEY_QR_SRC } from '../lib/surveyConfig';
+import { PATIENT_COLORS } from '../lib/authiTheme';
+import { PatientButtonSecondary } from './PatientButton';
 
 export default function CampaignCompleteModal({ profile, onClose, onSaved }) {
-  const [email, setEmail] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSave = async () => {
-    setSaving(true);
-    setError('');
-    const result = await submitCampaignSave({ profile, email });
-    if (!result.ok && result.mode === 'local') {
-      markCampaignSaved(email.trim() || null);
-      setSaved(true);
-      setSaving(false);
-      onSaved?.();
-      return;
-    }
-    if (!result.ok) {
-      setError(result.error ?? 'Could not save. Try again.');
-      setSaving(false);
-      return;
-    }
-    markCampaignSaved(email.trim() || null);
-    setSaved(true);
-    setSaving(false);
+  const handleSkip = async () => {
+    await submitCampaignSave({ profile, email: '' });
+    markCampaignSaved(null);
     onSaved?.();
+    onClose?.();
   };
 
   return (
@@ -42,61 +21,29 @@ export default function CampaignCompleteModal({ profile, onClose, onSaved }) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
         }}
       >
-        {saved ? (
-          <>
-            <h2 className="text-lg font-semibold text-[#111827]">Thank you</h2>
-            <p className="mt-2 text-sm text-[#6B7280]">
-              Your literacy results have been saved
-              {isSupabaseConfigured ? ' to our research database' : ' locally for this device'}.
-              {email.trim() ? ' We will be in touch about MVP updates.' : ''}
-            </p>
-            <PatientButtonPrimary type="button" onClick={onClose} className="mt-6 w-full">
-              Continue exploring
-            </PatientButtonPrimary>
-          </>
-        ) : (
-          <>
-            <h2 className="text-lg font-semibold text-[#111827]">Save your results</h2>
-            <p className="mt-2 text-sm text-[#6B7280]">
-              We save anonymous quiz results to improve medical scheme literacy tools.
-              No name or ID number is stored — only your answers and session.
-            </p>
+        <h2 className="text-lg font-semibold text-[#111827]">Optional feedback survey</h2>
+        <p className="mt-2 text-sm text-[#6B7280]">
+          Thanks for completing the literacy quizzes. Scan the QR code with your phone to share
+          quick feedback on the MVP — completely optional.
+        </p>
+        <p className="mt-1 text-xs text-[#9CA3AF]">
+          Responses are anonymised. No name or ID number is required.
+        </p>
 
-            <label className="mt-5 block text-xs font-medium text-[#6B7280]">
-              Email (optional — for MVP updates)
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="mt-1 w-full rounded-xl border border-[#E5E7EB] px-4 py-2.5 text-sm outline-none focus:border-[#9F62ED]"
-            />
+        <div className="mt-5 flex flex-col items-center rounded-2xl border border-[#E9D5FF] bg-white px-6 py-5">
+          <img
+            src={CUSTOMER_SURVEY_QR_SRC}
+            alt="Scan to open the SaluLink feedback survey"
+            className="h-44 w-44 object-contain"
+          />
+          <p className="mt-3 text-center text-xs font-medium text-[#374151]">
+            Scan with your camera app
+          </p>
+        </div>
 
-            {error && (
-              <p className="mt-2 text-xs text-red-600">{error}</p>
-            )}
-
-            <p className="mt-3 text-xs text-[#9CA3AF]">
-              By saving, you agree we may use anonymised responses for literacy research.
-              Email is only used if you opt in above.
-            </p>
-
-            <div className="mt-6 flex gap-3">
-              <PatientButtonPrimary
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1"
-              >
-                {saving ? 'Saving…' : email.trim() ? 'Save & opt in' : 'Save results'}
-              </PatientButtonPrimary>
-              <PatientButtonSecondary type="button" onClick={onClose}>
-                Later
-              </PatientButtonSecondary>
-            </div>
-          </>
-        )}
+        <PatientButtonSecondary type="button" onClick={handleSkip} className="mt-6 w-full">
+          Skip
+        </PatientButtonSecondary>
       </div>
     </div>
   );

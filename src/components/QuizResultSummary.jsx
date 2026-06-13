@@ -49,6 +49,9 @@ export default function QuizResultSummary({ summary, moduleId }) {
             <li key={bullet}>{bullet}</li>
           ))}
         </ul>
+        {summary.cta && (
+          <p className="text-xs font-medium text-[#9F62ED]">{summary.cta}</p>
+        )}
       </div>
     );
   }

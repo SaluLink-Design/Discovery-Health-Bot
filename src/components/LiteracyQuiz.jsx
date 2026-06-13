@@ -3,6 +3,7 @@ import {
   CAMPAIGN_MODULES,
   getModuleQuestions,
 } from '../lib/campaignLiteracy';
+import { getNextCampaignModuleAfter } from '../lib/campaignStore';
 import { loadHospitalModuleQuestions } from '../lib/quizHospitalData';
 import { loadMedicationModuleQuestions } from '../lib/quizMedicationData';
 import { loadTreatmentModuleQuestions } from '../lib/quizTreatmentData';
@@ -54,6 +55,7 @@ export default function LiteracyQuiz({
   conditionId,
   onComplete,
   onSkip,
+  onNavigate,
   embedded = false,
   skipIntro = false,
 }) {
@@ -176,7 +178,7 @@ export default function LiteracyQuiz({
     let cancelled = false;
     setIntroReady(false);
 
-    speakModuleIntro({
+    const cancelIntro = speakModuleIntro({
       text: spokenIntro,
       onComplete: () => {
         if (cancelled) return;
@@ -187,6 +189,7 @@ export default function LiteracyQuiz({
 
     return () => {
       cancelled = true;
+      cancelIntro();
     };
   }, [step, introSessionKey, spokenIntro, skipIntro]);
 
@@ -278,7 +281,14 @@ export default function LiteracyQuiz({
     });
   };
 
+  const handleFinishAndNavigate = (viewId) => {
+    handleFinish();
+    onNavigate?.(viewId);
+  };
+
   const score = answers.filter((a) => a.correct).length;
+  const nextModuleId = embedded ? getNextCampaignModuleAfter(moduleId, profile) : null;
+  const nextModuleMeta = nextModuleId ? CAMPAIGN_MODULES[nextModuleId] : null;
   const optionsLocked = answerPhase !== 'open' || showCorrection;
 
   if (!moduleMeta) return null;
@@ -492,15 +502,49 @@ export default function LiteracyQuiz({
             {score === questions.length ? 'Nailed it' : `${score} of ${questions.length}`}
           </p>
           <p className="mt-1 text-sm text-[#6B7280]">
-            {embedded ? 'Your basket is below.' : 'Explore the feature on your profile.'}
+            {embedded && nextModuleMeta
+              ? 'Continue to the next quick check, or explore this section below.'
+              : embedded && onNavigate
+                ? 'You finished the literacy journey — head home for the optional survey, or explore below.'
+                : embedded
+                  ? 'Your basket is below.'
+                  : 'Explore the feature on your profile.'}
           </p>
 
           <QuizResultSummary summary={resultSummary} moduleId={moduleId} />
 
-          <div className="mt-6">
-            <PatientButtonPrimary type="button" onClick={handleFinish} className="w-full sm:w-auto">
-              {embedded ? 'See my basket' : moduleMeta.exploreLabel}
-            </PatientButtonPrimary>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            {embedded && nextModuleMeta && onNavigate ? (
+              <>
+                <PatientButtonPrimary
+                  type="button"
+                  onClick={() => handleFinishAndNavigate(nextModuleId)}
+                  className="w-full sm:w-auto"
+                >
+                  Next quiz: {nextModuleMeta.title}
+                </PatientButtonPrimary>
+                <PatientButtonSecondary type="button" onClick={handleFinish} className="w-full sm:w-auto">
+                  {moduleId === 'treatment' ? 'See my basket' : moduleMeta.exploreLabel}
+                </PatientButtonSecondary>
+              </>
+            ) : embedded && onNavigate ? (
+              <>
+                <PatientButtonPrimary
+                  type="button"
+                  onClick={() => handleFinishAndNavigate('dashboard')}
+                  className="w-full sm:w-auto"
+                >
+                  Finish journey
+                </PatientButtonPrimary>
+                <PatientButtonSecondary type="button" onClick={handleFinish} className="w-full sm:w-auto">
+                  {moduleMeta.exploreLabel}
+                </PatientButtonSecondary>
+              </>
+            ) : (
+              <PatientButtonPrimary type="button" onClick={handleFinish} className="w-full sm:w-auto">
+                {embedded ? 'See my basket' : moduleMeta.exploreLabel}
+              </PatientButtonPrimary>
+            )}
           </div>
         </div>
       )}

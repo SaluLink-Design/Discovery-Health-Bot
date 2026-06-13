@@ -83,13 +83,13 @@ export const coverageLine = (label, focal, conditionId) => {
 const PMB_LINE =
   'This is funded under Prescribed Minimum Benefits once your condition is registered — Discovery pays up to the basket limit, not from your pocket.';
 
-export const buildQ1Context = (name, label, conditionId, focal, pronouns) => {
-  const { doctor, obj } = pronouns;
+export const buildQ1Context = (name, label, conditionId, focal, prons) => {
+  const { narrativeDoctor, obj } = prons;
   const purpose = CONDITION_PURPOSE[conditionId]?.(obj) ?? `${obj} condition`;
-  const testName = stripParens(focal.desc);
+  const testName = speakableDiagnosticName(focal.desc, conditionId);
   const article = /^[aeiou]/i.test(testName) ? 'an' : 'a';
 
-  return `${name} was just diagnosed with ${label}. ${doctor} orders ${article} ${testName} to check ${purpose}.`;
+  return `${name} was just diagnosed with ${label}. ${narrativeDoctor} orders ${article} ${testName} to check ${purpose}.`;
 };
 
 export const buildQ1Copy = ({ name, label, conditionId, focal, doctor }) => {

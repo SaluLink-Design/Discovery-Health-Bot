@@ -154,5 +154,5 @@ export const buildQ1CorrectionSpeech = ({ label, focal, conditionId }) => {
 
 export const buildQ2CorrectionSpeech = ({ usageTotal, usageItem, conditionId, doctor }) => {
   const ongoing = speakableOngoingName(usageItem.desc, conditionId);
-  return `When all ${usageTotal} ${ongoing} are used, Discovery does not pay automatically. ${doctor} can submit a motivation. Discovery reviews it, and approval is not guaranteed.`;
+  return `When all ${usageTotal} ${ongoing} are used, Discovery does not pay automatically. ${doctor} must submit a clinical motivation with supporting documentation. Discovery reviews it — approval is not guaranteed. Until then you may pay the full cost yourself.`;
 };

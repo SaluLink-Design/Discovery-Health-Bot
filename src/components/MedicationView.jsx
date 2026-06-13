@@ -37,6 +37,7 @@ import { isModuleUnlocked } from '../lib/campaignStore';
 import { buildMedicineIntroSpeech, MEDICINE_COVER_COPY } from '../lib/literacyModuleCopy';
 import LiteracyModuleQuickCheck from './LiteracyModuleQuickCheck';
 import FeaturePageHeader from './FeaturePageHeader';
+import CampaignNextQuizBanner from './CampaignNextQuizBanner';
 import GoodToKnowCard from './GoodToKnowCard';
 import GradientChip from './GradientChip';
 import { GradientSegmentButton, GradientSegmentTrack } from './GradientSegment';
@@ -305,6 +306,7 @@ export default function MedicationView({
   onEditProfile,
   prescriptions,
   campaignRefreshKey = 0,
+  onCampaignProgress,
   browseAllConditions = false,
   onBrowseAllConditionsChange,
 }) {
@@ -503,6 +505,8 @@ export default function MedicationView({
           conditionId={effectiveCondition}
           refreshKey={campaignRefreshKey}
           onUnlock={() => setModuleUnlocked(true)}
+          onNavigate={onNavigate}
+          onCampaignProgress={onCampaignProgress}
           introSpeech={medicineIntroSpeech}
           moduleIntroQuizPitch={MEDICINE_COVER_COPY.moduleIntroQuizPitch}
           startQuizLabel={MEDICINE_COVER_COPY.startQuizLabel}
@@ -513,6 +517,12 @@ export default function MedicationView({
 
       {moduleUnlocked && (
         <>
+      <CampaignNextQuizBanner
+        moduleId="medication"
+        profile={profile}
+        onNavigate={onNavigate}
+      />
+
       {!hidePrescriptionUi && (
         <ActivePrescriptionsPanel
           rows={activeMedicationRows}

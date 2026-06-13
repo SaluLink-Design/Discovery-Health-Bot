@@ -10,6 +10,8 @@ export default function TreatmentQuickCheck({
   conditionId,
   refreshKey = 0,
   onUnlock,
+  onNavigate,
+  onCampaignProgress,
 }) {
   return (
     <LiteracyModuleQuickCheck
@@ -18,6 +20,8 @@ export default function TreatmentQuickCheck({
       conditionId={conditionId}
       refreshKey={refreshKey}
       onUnlock={onUnlock}
+      onNavigate={onNavigate}
+      onCampaignProgress={onCampaignProgress}
       introSpeech={TREATMENT_BASKET_COPY.introSpeech}
       moduleIntroQuizPitch={TREATMENT_BASKET_COPY.moduleIntroQuizPitch}
       startQuizLabel={TREATMENT_BASKET_COPY.startQuizLabel}

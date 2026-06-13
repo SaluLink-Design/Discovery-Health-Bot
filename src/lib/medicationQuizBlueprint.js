@@ -10,7 +10,7 @@ import {
   buildUnlistedQ2Speech,
   speakableBrand,
 } from './medicationSpeech';
-import { personaName, pronouns } from './quizShared';
+import { personaName, planOnPhrase, planOnSentenceStart, pronouns } from './quizShared';
 
 const EXEC_COMP_PLANS = new Set(['executive', 'comprehensive']);
 
@@ -107,7 +107,7 @@ export const buildExcludedQ1 = ({ name, label, med, planLabel, planId, doctor, s
       { id: 'cda', label: `${subj} pays only a small amount out of pocket` },
     ],
     correct: 'rejected',
-    correction: `This medicine is not included on ${planLabel}. ${doctor} must submit a clinical motivation with supporting documentation before Discovery will consider paying. Approval is not guaranteed — until then ${subj.toLowerCase()} may pay the full price.`,
+    correction: `This medicine is not included ${planOnPhrase(planLabel)}. ${doctor} must submit a clinical motivation with supporting documentation before Discovery will consider paying. Approval is not guaranteed — until then ${subj.toLowerCase()} may pay the full price.`,
     correctionBrief: buildExcludedCorrectionSpeech({ doctor, planLabel }),
     visualAfterSecondary: 'motivation',
   };
@@ -192,7 +192,7 @@ export const buildUnlistedQ2 = ({ name, label, med, listedMed, planId, planLabel
       { id: 'full', label: `R${pharmacyPrice} — you pay the full pharmacy price` },
     ],
     correct: 'member',
-    correction: `On ${planLabel}, Discovery pays up to R${cda} for this ingredient. The pharmacy charged R${pharmacyPrice} — ${name} pays the difference, R${memberPays} out of pocket.`,
+    correction: `${planOnSentenceStart(planLabel)}, Discovery pays up to R${cda} for this ingredient. The pharmacy charged R${pharmacyPrice} — ${name} pays the difference, R${memberPays} out of pocket.`,
     correctionBrief: buildUnlistedCorrectionSpeech({ memberPays, cda }),
   };
 };

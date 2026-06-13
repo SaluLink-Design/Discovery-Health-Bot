@@ -20,6 +20,8 @@ export default function LiteracyModuleQuickCheck({
   conditionId,
   refreshKey = 0,
   onUnlock,
+  onNavigate,
+  onCampaignProgress,
   introSpeech,
   moduleIntroQuizPitch,
   startQuizLabel = 'Test what I know',
@@ -58,7 +60,7 @@ export default function LiteracyModuleQuickCheck({
     let cancelled = false;
     setIntroReady(false);
 
-    speakModuleIntro({
+    const cancelIntro = speakModuleIntro({
       text: spokenIntro,
       onComplete: () => {
         if (cancelled) return;
@@ -69,8 +71,11 @@ export default function LiteracyModuleQuickCheck({
 
     return () => {
       cancelled = true;
+      cancelIntro();
     };
   }, [quizStarted, introSessionKey, spokenIntro]);
+
+  useEffect(() => () => stopSpeaking(), []);
 
   const unlock = () => {
     stopSpeaking();
@@ -91,6 +96,7 @@ export default function LiteracyModuleQuickCheck({
   const handleComplete = (result) => {
     completeModuleQuiz(moduleId, result);
     submitModuleResult({ moduleId, profile, result }).catch(() => {});
+    onCampaignProgress?.();
     setQuizStarted(false);
     unlock();
   };
@@ -103,6 +109,7 @@ export default function LiteracyModuleQuickCheck({
         conditionId={conditionId}
         embedded
         skipIntro
+        onNavigate={onNavigate}
         onComplete={handleComplete}
         onSkip={handleSkip}
       />

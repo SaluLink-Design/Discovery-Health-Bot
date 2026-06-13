@@ -16,24 +16,30 @@ import {
   pronouns,
 } from './quizShared';
 
-/** Fetch PDF-backed basket; fall back to bundled CDL data. */
+/** Fetch PDF-backed basket; merge with bundled CDL data when PDF rows are missing. */
 export const fetchTreatmentBasket = async (conditionId) => {
+  const bundled = CDL_CONDITION_DETAILS[conditionId]?.treatment ?? {};
+  const fallback = {
+    conditionId,
+    diagnostic: bundled.diagnostic ?? [],
+    ongoing: bundled.ongoing ?? [],
+  };
+
   try {
     const res = await fetch(`/api/treatments?condition_id=${encodeURIComponent(conditionId)}`);
     if (res.ok) {
       const data = await res.json();
-      if (data.diagnostic?.length || data.ongoing?.length) return data;
+      return {
+        conditionId,
+        diagnostic: data.diagnostic?.length ? data.diagnostic : fallback.diagnostic,
+        ongoing: data.ongoing?.length ? data.ongoing : fallback.ongoing,
+      };
     }
   } catch {
     // offline / API down
   }
 
-  const details = CDL_CONDITION_DETAILS[conditionId];
-  return {
-    conditionId,
-    diagnostic: details?.treatment?.diagnostic ?? [],
-    ongoing: details?.treatment?.ongoing ?? [],
-  };
+  return fallback;
 };
 
 const withUsage = (items, matchDesc, used) =>
@@ -90,14 +96,21 @@ export const buildTreatmentQuizQuestions = (profile, basket, conditionId) => {
   const name = personaName(profile);
   const label = conditionLabel(conditionId);
   const prons = pronouns(profile);
-  const { subj, doctor } = prons;
+  const { subj, narrativeDoctor } = prons;
 
   const focal = pickDiagnosticForQuiz(basket.diagnostic ?? []);
   const usageItem = pickOngoingForQuiz(basket.ongoing ?? []);
   const usageTotal = usageItem.count ?? 3;
 
-  const q1 = buildQ1Copy({ name, label, conditionId, focal, doctor });
-  const q2 = buildQ2Copy({ name, conditionId, usageTotal, usageItem, doctor, subj });
+  const q1 = buildQ1Copy({ name, label, conditionId, focal, doctor: narrativeDoctor });
+  const q2 = buildQ2Copy({
+    name,
+    conditionId,
+    usageTotal,
+    usageItem,
+    doctor: narrativeDoctor,
+    subj,
+  });
 
   const sourceNote = `${label} · Chronic Disease List treatment guide 2026`;
   const diagnosticSection = {

@@ -1,4 +1,5 @@
 import { normalizeLabel } from './medicineClassifier';
+import { planOnPhrase } from './quizShared';
 
 const stripStrength = (label) =>
   normalizeLabel(label)
@@ -24,7 +25,7 @@ export const buildUnlistedQ2Speech = ({ name, brandLabel, pharmacyPrice, cda }) 
   `${name} goes to Clicks but only finds ${speakableBrand(brandLabel)} — it is not on the approved list. The pharmacy charges ${pharmacyPrice} rand. Discovery pays up to ${cda} rand. How much does ${name} pay out of pocket?`;
 
 export const buildExcludedCorrectionSpeech = ({ doctor, planLabel }) =>
-  `This medicine is not included on ${planLabel}. The scheme rejects the claim until ${doctor.toLowerCase()} submits a clinical motivation with supporting documentation. Discovery reviews it — approval is not guaranteed.`;
+  `This medicine is not included ${planOnPhrase(planLabel)}. The scheme rejects the claim until ${doctor} submits a clinical motivation with supporting documentation. Discovery reviews it — approval is not guaranteed.`;
 
 export const buildListedCorrectionSpeech = ({ brandLabel }) =>
   `${speakableBrand(brandLabel)} is on the approved list for your condition. At Clicks or Dis-Chem, your medical scheme usually pays the full pharmacy price.`;

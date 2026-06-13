@@ -101,17 +101,3 @@ export const getPrimaryHomeAction = (profile) => {
 
 export const getMemberFeature = (view) =>
   MEMBER_FEATURES.find((feature) => feature.view === view);
-
-/** Fixed home-screen shortcuts — matches patient interface design. */
-export const ALSO_EXPLORE_ITEMS = [
-  {
-    label: 'Check medicine cover',
-    description: 'Search medicines on your plan',
-    view: 'medication',
-  },
-  {
-    label: 'Find hospitals on my plan',
-    description: 'Nearest in-network hospitals from your location',
-    view: 'hospitals',
-  },
-];

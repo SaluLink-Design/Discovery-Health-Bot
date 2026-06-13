@@ -13,16 +13,20 @@ const PlanCard = ({ plan, selected, onSelect }) => (
   <button
     type="button"
     onClick={() => onSelect(plan.id)}
-    className={`group flex flex-col gap-1 rounded-2xl border p-4 text-left transition-all ${
+    className={`group flex min-w-0 w-full flex-col gap-1 rounded-2xl border p-4 text-left transition-all ${
       selected
         ? 'border-[#9F62ED]/50 bg-[#9F62ED]/10 ring-1 ring-[#9F62ED]/30'
         : 'border-[#EAECF0] bg-[#F9FAFB] hover:border-[#9F62ED]/30 hover:bg-white'
     }`}
   >
-    <span className={`text-sm font-semibold ${selected ? 'text-[#9F62ED]' : 'text-[#111827]'}`}>
+    <span
+      className={`break-words text-sm font-semibold leading-snug ${
+        selected ? 'text-[#9F62ED]' : 'text-[#111827]'
+      }`}
+    >
       {plan.label}
     </span>
-    <span className="text-xs leading-5 text-[#6B7280]">{plan.tagline}</span>
+    <span className="break-words text-xs leading-5 text-[#6B7280]">{plan.tagline}</span>
   </button>
 );
 

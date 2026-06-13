@@ -17,6 +17,7 @@ import LiteracyModuleQuickCheck from './LiteracyModuleQuickCheck';
 import { PATIENT_CLASSES } from '../lib/authiTheme';
 import BrandEyebrow from './BrandEyebrow';
 import FeaturePageHeader from './FeaturePageHeader';
+import CampaignNextQuizBanner from './CampaignNextQuizBanner';
 import GoodToKnowCard from './GoodToKnowCard';
 import { GradientSegmentButton, GradientSegmentTrack } from './GradientSegment';
 import { PatientButtonPrimary } from './PatientButton';
@@ -61,6 +62,7 @@ export default function HospitalNetworkView({
   onNavigate,
   highlightOffPlan = false,
   campaignRefreshKey = 0,
+  onCampaignProgress,
 }) {
   const plan = getPlanFromProfile(profile);
   const planNetworks = getPlanHospitalNetworks(profile);
@@ -206,6 +208,8 @@ export default function HospitalNetworkView({
           profile={profile}
           refreshKey={campaignRefreshKey}
           onUnlock={() => setModuleUnlocked(true)}
+          onNavigate={onNavigate}
+          onCampaignProgress={onCampaignProgress}
           introSpeech={HOSPITAL_COVER_COPY.introSpeech}
           moduleIntroQuizPitch={HOSPITAL_COVER_COPY.moduleIntroQuizPitch}
           startQuizLabel={HOSPITAL_COVER_COPY.startQuizLabel}
@@ -216,6 +220,12 @@ export default function HospitalNetworkView({
 
       {moduleUnlocked && (
         <>
+      <CampaignNextQuizBanner
+        moduleId="hospitals"
+        profile={profile}
+        onNavigate={onNavigate}
+      />
+
       <div className={PATIENT_CLASSES.card}>
         <BrandEyebrow className="mb-4">Your location</BrandEyebrow>
 

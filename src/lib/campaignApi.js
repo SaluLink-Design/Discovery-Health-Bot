@@ -4,6 +4,7 @@ import {
   loadCampaignState,
 } from './campaignStore';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import { sendSurveyInviteEmail } from './sendSurveyInvite';
 
 const PENDING_KEY = 'authi_campaign_pending_sync';
 
@@ -68,6 +69,32 @@ export const submitScenarioRun = async ({ moduleId, profile }) => {
     return { ok: false, mode: 'local', error: error.message };
   }
   return { ok: true, mode: 'supabase' };
+};
+
+/** Optional survey opt-in — saves email on campaign_sessions and requests survey link delivery. */
+export const submitSurveyOptIn = async ({ profile, email }) => {
+  const trimmedEmail = email.trim();
+  if (!trimmedEmail) {
+    return { ok: false, error: 'Please enter your email to receive the survey link.' };
+  }
+
+  const sessionResult = await submitCampaignSave({ profile, email: trimmedEmail });
+  if (!sessionResult.ok && sessionResult.mode !== 'local') {
+    return sessionResult;
+  }
+
+  let emailSent = false;
+  let emailReason = null;
+  const delivery = await sendSurveyInviteEmail(trimmedEmail);
+  emailSent = delivery.sent;
+  emailReason = delivery.reason;
+
+  return {
+    ok: true,
+    mode: isSupabaseConfigured ? 'supabase' : 'local',
+    emailSent,
+    emailReason,
+  };
 };
 
 /** Final save at end of journey — optional email opt-in. */

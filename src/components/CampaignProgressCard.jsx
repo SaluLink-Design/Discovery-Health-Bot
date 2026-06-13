@@ -175,7 +175,7 @@ export default function CampaignProgressCard({
             className="mt-4 w-full rounded-xl py-3 text-sm font-semibold text-white"
             style={{ background: AUTHI_GRADIENT, border: 'none', cursor: 'pointer' }}
           >
-            Save my results
+            Scan survey QR
           </button>
         )}
       </div>
