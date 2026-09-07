@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import AuthiChatView from './components/AuthiChatView';
 import DashboardView from './components/DashboardView';
 import MemberLanding from './components/MemberLanding';
 import CampaignSetupPanel from './components/CampaignSetupPanel';
@@ -197,7 +198,7 @@ export default function App() {
           browseAllConditions={browseAllConditions}
           onBrowseAllConditionsChange={setBrowseAllConditions}
         />
-        <div className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto">
+        <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
           <PatientTopBar
             profile={profile}
             activeConditionId={activeConditionId}
@@ -205,7 +206,13 @@ export default function App() {
             onStartOver={handleStartOver}
             onRetakeJourney={handleRetakeJourney}
           />
-          <main className="flex-1 px-8 py-7">
+          <main
+            className={
+              currentView === 'chat'
+                ? 'flex min-h-0 flex-1 flex-col px-8 py-5'
+                : 'flex-1 overflow-y-auto px-8 py-7'
+            }
+          >
             {currentView === 'dashboard' && (
               <DashboardView
                 profile={profile}
@@ -218,6 +225,7 @@ export default function App() {
                 onRetakeModuleQuiz={handleRetakeModuleQuiz}
               />
             )}
+            {currentView === 'chat' && <AuthiChatView profile={profile} />}
             {currentView === 'plan' && (
               <PlanBreakdownView profile={profile} onNavigate={setCurrentView} />
             )}

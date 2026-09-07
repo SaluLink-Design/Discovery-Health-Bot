@@ -29,6 +29,7 @@ from backend.hospital_geo import (
     build_nearby_hospital_results,
     resolve_user_location,
 )
+from backend.authi_llm import generate_authi_answer, llm_is_configured, llm_model_name
 from backend.hospital_network_index import (
     NETWORK_LABELS,
     HospitalSearchParams,
@@ -65,6 +66,11 @@ PDF_SOURCES = [
         "id": "hospital_network",
         "label": "Quality Care in Our Hospital Network 2026",
         "file_name": "dhms-hospital-network-list.pdf",
+    },
+    {
+        "id": "contribution",
+        "label": "Discovery Health 2026 Contribution Table",
+        "file_name": "contribution-table.pdf",
     },
 ]
 
@@ -208,10 +214,31 @@ _FALSE_POSITIVE_CONDITION_TOKENS = frozenset(
 )
 
 
+class AskProfile(BaseModel):
+    name: str | None = None
+    planId: str | None = None
+    planLabel: str | None = None
+    subThemeLabel: str | None = None
+    conditionIds: list[str] | None = None
+    conditionLabels: list[str] | None = None
+    town: str | None = None
+    province: str | None = None
+    networkCodes: list[str] | None = None
+    contributionMonthly: str | None = None
+    contributionNotes: str | None = None
+
+
+class AskTurn(BaseModel):
+    role: str
+    content: str
+
+
 class AskRequest(BaseModel):
     query: str = ""
     networkCodes: list[str] | None = None
     planId: str | None = None
+    profile: AskProfile | None = None
+    history: list[AskTurn] | None = None
 
 
 def normalize_whitespace(value: str) -> str:
@@ -243,6 +270,8 @@ def load_pdf_index() -> list[dict[str, str]]:
 
     for source in PDF_SOURCES:
         file_path = ROOT / source["file_name"]
+        if not file_path.exists():
+            continue
         document = fitz.open(file_path)
         text = "".join(page.get_text() for page in document)
         document.close()
@@ -639,10 +668,237 @@ app.add_middleware(
 )
 
 
+_PAY_WORDS = (
+    "pay",
+    "pays",
+    "contribution",
+    "premium",
+    "msa",
+    "savings",
+    "cost",
+    "costs",
+    "price",
+    "how much",
+)
+_NEAR_WORDS = ("near", "nearby", "closest", "nearest", "around me", "in my area")
+_MED_STOPWORDS = frozenset(
+    {
+        "what",
+        "which",
+        "where",
+        "when",
+        "does",
+        "do",
+        "is",
+        "are",
+        "the",
+        "my",
+        "on",
+        "for",
+        "and",
+        "with",
+        "plan",
+        "cover",
+        "covered",
+        "medicine",
+        "medicines",
+        "medication",
+        "hospital",
+        "hospitals",
+        "network",
+        "chronic",
+        "condition",
+        "please",
+        "tell",
+        "about",
+        "list",
+        "show",
+        "find",
+        "care",
+    }
+)
+
+
+def _cdl_key_for_condition_id(condition_id: str) -> str:
+    return _FRONTEND_TO_CDL_KEY.get(condition_id, condition_id.replace("_", " "))
+
+
+def _boost_query_with_profile(query: str, profile: AskProfile | None) -> str:
+    if not profile:
+        return query
+
+    extras: list[str] = []
+    lowered = query.lower()
+    hospitalish = any(word in lowered for word in ("hospital", "hospitals", "network", "facility", "admission"))
+    if hospitalish:
+        if profile.province and profile.province.lower() not in lowered:
+            extras.append(profile.province)
+        if profile.town and profile.town.lower() not in lowered:
+            extras.append(profile.town)
+
+    conditionish = any(
+        word in lowered for word in ("medicine", "medicines", "cover", "covered", "basket", "care", "treatment", "formulary")
+    )
+    labels = [label for label in (profile.conditionLabels or []) if label]
+    if conditionish and labels and not any(label.lower() in lowered for label in labels):
+        extras.extend(labels[:2])
+
+    if not extras:
+        return query
+    return f"{query} ({', '.join(extras)})"
+
+
+def _search_formulary_mentions(query: str, limit: int = 20) -> list[dict[str, str]]:
+    tokens = [
+        token
+        for token in re.findall(r"[a-zA-Z][a-zA-Z0-9+/.-]{3,}", query.lower())
+        if token not in _MED_STOPWORDS
+    ]
+    if not tokens:
+        return []
+
+    matches: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for condition_key, items in CDL_MEDICINE_INDEX.items():
+        display = CDL_CONDITIONS_DISPLAY.get(condition_key, condition_key.title())
+        for item in items:
+            label = (item.get("label") or "").strip()
+            if len(label) < 4:
+                continue
+            low = label.lower()
+            if not any(token in low for token in tokens):
+                continue
+            key = f"{display}:{low}"
+            if key in seen:
+                continue
+            seen.add(key)
+            matches.append(
+                {
+                    "label": label,
+                    "detail": (item.get("detail") or f"Listed under {display} on the Chronic Illness Benefit medicine list."),
+                    "condition": display,
+                }
+            )
+            if len(matches) >= limit:
+                return matches
+    return matches
+
+
+def _nearby_hospital_section(profile: AskProfile | None, network_codes: list[str] | None) -> dict[str, Any] | None:
+    if not profile or not profile.province:
+        return None
+
+    prov = canonical_province(profile.province)
+    if not prov:
+        return None
+
+    location = resolve_user_location(lat=None, lng=None, province=prov, town=profile.town)
+    if not location:
+        return None
+
+    user_lat, user_lng, _source = location
+    nets = merge_network_filters(
+        ",".join(network_codes) if network_codes else None,
+        None,
+    )
+    unrestricted = nets is None
+    province_records = filter_hospital_records(
+        HOSPITAL_RECORDS,
+        province=prov,
+        networks=None,
+        town_substring=None,
+        name_substring=None,
+    )
+    nearby = build_nearby_hospital_results(
+        province_records,
+        user_lat=user_lat,
+        user_lng=user_lng,
+        plan_networks=nets,
+        unrestricted=unrestricted,
+        limit_on=5,
+        limit_off=3,
+    )
+    items = [
+        *(nearby.get("onPlan", {}).get("items") or []),
+        *(nearby.get("offPlan", {}).get("items") or []),
+    ]
+    if not items:
+        return None
+    where = profile.town or prov.title()
+    return {
+        "title": f"Hospitals near {where}",
+        "items": items,
+    }
+
+
+def _profile_condition_sections(profile: AskProfile | None) -> list[dict[str, Any]]:
+    if not profile:
+        return []
+    ids = profile.conditionIds or []
+    labels = profile.conditionLabels or []
+    sections: list[dict[str, Any]] = []
+    for index, condition_id in enumerate(ids[:3]):
+        cdl_key = _cdl_key_for_condition_id(condition_id)
+        display = labels[index] if index < len(labels) else CDL_CONDITIONS_DISPLAY.get(cdl_key, cdl_key)
+        treatment_items = CDL_TREATMENT_INDEX.get(cdl_key) or []
+        if treatment_items:
+            sections.append(
+                {
+                    "title": f"Treatment basket – {display}",
+                    "items": treatment_items[:16],
+                }
+            )
+        medicine_items = CDL_MEDICINE_INDEX.get(cdl_key) or []
+        if medicine_items:
+            sections.append(
+                {
+                    "title": f"Formulary medicines – {display}",
+                    "items": medicine_items[:16],
+                }
+            )
+    return sections
+
+
+def _contribution_section(query: str, profile: AskProfile | None) -> dict[str, Any] | None:
+    lowered = query.lower()
+    if not any(word in lowered for word in _PAY_WORDS):
+        return None
+
+    items: list[dict[str, str]] = []
+    if profile and profile.contributionMonthly:
+        items.append(
+            {
+                "label": profile.contributionMonthly,
+                "detail": profile.contributionNotes
+                or "From the 2026 contribution table applied to this member's plan and household.",
+            }
+        )
+    keywords = ["contribution", "monthly"]
+    if profile and profile.subThemeLabel:
+        keywords.insert(0, profile.subThemeLabel.lower())
+    elif profile and profile.planLabel:
+        keywords.insert(0, profile.planLabel.lower())
+    snippet = get_document_snippet("contribution", keywords)
+    if snippet and snippet.get("excerpt"):
+        items.append(
+            {
+                "label": "Contribution table excerpt",
+                "detail": snippet["excerpt"],
+            }
+        )
+    if not items:
+        return None
+    return {"title": "What you pay", "items": items}
+
+
 @app.get("/api/health")
 def health() -> dict[str, Any]:
     return {
         "ok": True,
+        "llm": {
+            "configured": llm_is_configured(),
+            "model": llm_model_name(),
+        },
         "documents": [
             {"id": entry["id"], "label": entry["label"], "fileName": entry["file_name"]}
             for entry in PDF_INDEX
@@ -763,7 +1019,72 @@ def send_survey_invite(body: SurveyInviteRequest) -> dict[str, Any]:
 
 @app.post("/api/ask")
 def ask(request: AskRequest) -> dict[str, Any]:
-    return ask_authi(request.query, explicit_network_codes=request.networkCodes or None)
+    profile = request.profile
+    network_codes = request.networkCodes or (profile.networkCodes if profile else None)
+    query = request.query.strip()
+    boosted = _boost_query_with_profile(query, profile)
+
+    result = ask_authi(boosted, explicit_network_codes=network_codes or None)
+
+    extra_sections: list[dict[str, Any]] = []
+    lowered = query.lower()
+
+    pay_section = _contribution_section(query, profile)
+    if pay_section:
+        extra_sections.append(pay_section)
+        plan_keyword = "contribution"
+        if profile and profile.subThemeLabel:
+            plan_keyword = profile.subThemeLabel.lower()
+        snippet = get_document_snippet("contribution", [plan_keyword, "contribution"])
+        if snippet:
+            result.setdefault("sources", []).append(snippet)
+
+    if any(word in lowered for word in _NEAR_WORDS) or "hospital" in lowered:
+        nearby = _nearby_hospital_section(profile, network_codes)
+        if nearby:
+            extra_sections.append(nearby)
+
+    formulary_hits = _search_formulary_mentions(query)
+    if formulary_hits:
+        extra_sections.append(
+            {
+                "title": "Medicine list matches",
+                "items": [
+                    {
+                        "label": f"{hit['label']} ({hit['condition']})",
+                        "detail": hit["detail"],
+                    }
+                    for hit in formulary_hits
+                ],
+            }
+        )
+
+    weak_sections = not result.get("sections")
+    if profile and weak_sections:
+        extra_sections.extend(_profile_condition_sections(profile))
+
+    history = [{"role": turn.role, "content": turn.content} for turn in (request.history or [])]
+    profile_payload = None
+    if profile is not None:
+        profile_payload = profile.model_dump() if hasattr(profile, "model_dump") else profile.dict()
+    llm = generate_authi_answer(
+        query=query or boosted,
+        profile=profile_payload,
+        retrieval=result,
+        history=history,
+        extra_sections=extra_sections,
+    )
+
+    result["answer"] = llm["answer"]
+    result["llm"] = {
+        "ok": llm["ok"],
+        "reason": llm["reason"],
+        "model": llm["model"],
+        "configured": llm_is_configured(),
+    }
+    if extra_sections:
+        result["sections"] = extra_sections + (result.get("sections") or [])
+    return result
 
 
 @app.get("/api/hospitals/search")

@@ -408,6 +408,41 @@ export default function DashboardView({
         )}
       </div>
 
+      <div className="rounded-2xl p-6" style={cardStyle}>
+        <BrandEyebrow className="mb-4">Also explore</BrandEyebrow>
+        <div className="flex flex-col gap-3">
+          <div
+            className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
+            style={{ background: '#F9FAFB', border: `1px solid ${PATIENT_COLORS.divider}` }}
+          >
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: PATIENT_COLORS.textPrimary }}>
+                Ask Authi
+              </p>
+              <p style={{ fontSize: '12px', color: PATIENT_COLORS.textSecondary, marginTop: 2 }}>
+                Chat about cover, medicines, hospitals, and what you pay
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate('chat')}
+              className="inline-flex shrink-0 items-center gap-1 rounded-xl px-4 py-2"
+              style={{
+                background: AUTHI_GRADIENT,
+                color: '#FFFFFF',
+                fontSize: '12px',
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Open
+              <ArrowRight size={13} />
+            </button>
+          </div>
+        </div>
+      </div>
+
       <p
         className="mt-8 text-center"
         style={{ fontSize: '12px', color: PATIENT_COLORS.textMuted }}

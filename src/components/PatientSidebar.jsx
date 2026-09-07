@@ -7,6 +7,7 @@ import SaluLinkWordmark from './SaluLinkWordmark';
 const PATIENT_NAV = CAMPAIGN_MEMBER_MODE
   ? [
       { id: 'dashboard', label: 'Home' },
+      { id: 'chat', label: 'Ask Authi' },
       ...MEMBER_FEATURES.map(({ view, navLabel }) => ({
         id: view,
         label: navLabel,
